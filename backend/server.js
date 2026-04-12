@@ -13,6 +13,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust Vercel Proxy (fixes Rate Limiter header errors)
+app.set('trust proxy', 1);
+
 // Use extended query parser to support bracket notation (price[lte], price[gte], etc.)
 app.set('query parser', 'extended');
 
