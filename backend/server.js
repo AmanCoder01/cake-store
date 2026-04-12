@@ -86,9 +86,11 @@ app.use((req, res, next) => {
 app.use(errorMiddleware);
 
 const DB = process.env.MONGODB_URI || 'mongodb://localhost:27017/cake-store';
+console.log(DB);
 mongoose.connect(DB).then(() => {
   console.log('DB connection successful!');
 }).catch(err => {
+  console.log(DB);
   console.error('DB connection error:', err);
 });
 
