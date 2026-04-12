@@ -1,0 +1,288 @@
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Star, Heart, Clock, Truck, ShieldCheck, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getProducts } from '../../store/slices/productSlice';
+import { toggleWishlist, getWishlist } from '../../store/slices/wishlistSlice';
+import { getBanners } from '../../store/slices/bannerSlice';
+import { getCategories } from '../../store/slices/categorySlice';
+import toast from 'react-hot-toast';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Skeleton from '../../components/ui/Skeleton';
+import Meta from '../../components/layout/Meta';
+
+const Home = () => {
+  const dispatch = useDispatch();
+  const { products, isLoading } = useSelector((state) => state.product);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
+  const { items: banners } = useSelector((state) => state.banner);
+  const { items: categories } = useSelector((state) => state.category);
+  const { user } = useSelector((state) => state.auth);
+
+  const [currentBanner, setCurrentBanner] = useState(0);
+
+  useEffect(() => {
+    dispatch(getProducts('limit=8&isFeatured=true'));
+    dispatch(getBanners());
+    dispatch(getCategories());
+    if (user) {
+      dispatch(getWishlist());
+    }
+  }, [dispatch, user]);
+
+  // Auto-slide banners
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [banners.length]);
+
+  const handleToggleWishlist = (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast.error('Please login to save favorites');
+      return;
+    }
+    dispatch(toggleWishlist(productId)).then((res) => {
+      if (res.payload.action === 'added') toast.success('Added to wishlist');
+      else toast.success('Removed from wishlist');
+    });
+  };
+
+  const isInWishlist = (productId) => {
+    return wishlistItems.some(item => (item.product?._id || item.product) === productId);
+  };
+
+  const features = [
+    { icon: <Truck className="text-primary" />, title: 'Fast Delivery', desc: 'Freshly baked cakes delivered within 24 hours to your doorstep.' },
+    { icon: <ShieldCheck className="text-primary" />, title: 'Quality Assured', desc: 'We use premium ingredients and maintain strict hygiene standards.' },
+    { icon: <Clock className="text-primary" />, title: 'All Occasions', desc: 'Pre-order for any upcoming event or get instant delivery for selected items.' },
+  ];
+
+  return (
+    <div className="space-y-24 pb-20">
+      <Meta title="Home" description="Freshly baked happiness delivered to your door." />
+
+      {/* Hero Banners */}
+      <section className="relative h-[450px] sm:h-[650px] overflow-hidden rounded-[40px] sm:rounded-[60px] shadow-2xl">
+        {isLoading ? (
+          <Skeleton className="w-full h-full rounded-[60px]" />
+        ) : (
+          <div className="relative h-full">
+            <AnimatePresence mode="wait">
+              {banners.length > 0 && (
+                <motion.div
+                  key={currentBanner}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1 }}
+                  className="absolute inset-0"
+                >
+                  <img src={banners[currentBanner].image.url} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex items-center p-8 sm:p-24">
+                    <div className="max-w-2xl space-y-6 sm:space-y-8">
+                       <motion.span 
+                         initial={{ y: 20, opacity: 0 }}
+                         animate={{ y: 0, opacity: 1 }}
+                         transition={{ delay: 0.2 }}
+                         className="inline-block bg-primary px-6 py-2 rounded-full text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/30"
+                       >
+                         {banners[currentBanner].subtitle}
+                       </motion.span>
+                       <motion.h1 
+                         initial={{ y: 20, opacity: 0 }}
+                         animate={{ y: 0, opacity: 1 }}
+                         transition={{ delay: 0.4 }}
+                         className="text-4xl sm:text-7xl font-black text-white leading-[1.1]"
+                       >
+                         {banners[currentBanner].title}
+                       </motion.h1>
+                       <motion.div
+                         initial={{ y: 20, opacity: 0 }}
+                         animate={{ y: 0, opacity: 1 }}
+                         transition={{ delay: 0.6 }}
+                       >
+                         <Link to={banners[currentBanner].link}>
+                           <Button size="lg" className="rounded-2xl px-12 text-lg shadow-2xl">Shop Now</Button>
+                         </Link>
+                       </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Banner dots */}
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+              {banners.map((_, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => setCurrentBanner(idx)}
+                  className={`w-3 h-3 rounded-full transition-all duration-500 ${currentBanner === idx ? 'bg-primary w-10 shadow-lg shadow-primary/50' : 'bg-white/40'}`} 
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Categories */}
+      <section className="space-y-10 sm:space-y-12">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight mb-3">Shop by Category</h2>
+            <p className="text-secondary text-base">Deliciously categorized for your convenience</p>
+          </div>
+          <Link to="/products" className="group text-primary font-extrabold flex items-center gap-2">
+            See All <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+          {isLoading ? (
+            [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-48 sm:h-80 rounded-[40px]" />)
+          ) : (
+            categories?.slice(0, 4).map((cat) => (
+              <Link key={cat._id} to={`/products?category=${cat.name}`} className="group relative h-48 sm:h-80 rounded-[40px] overflow-hidden shadow-lg transition-all hover:-translate-y-2">
+                <img 
+                  src={cat.image?.url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=400'} 
+                  alt={cat.name} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                <div className="absolute bottom-8 left-8 text-white">
+                  <h3 className="text-xl sm:text-2xl font-extrabold mb-1">{cat.name}</h3>
+                  <div className="w-10 h-1 bg-primary rounded-full group-hover:w-20 transition-all duration-500" />
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-white rounded-[60px] p-8 sm:p-20 shadow-sm border border-orange-50/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+          {features.map((feature, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center group">
+              <div className="w-24 h-24 rounded-[32px] bg-primary/5 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500 group-hover:rotate-6">
+                <div className="text-primary group-hover:text-white transition-colors">
+                    {feature.icon}
+                </div>
+              </div>
+              <h3 className="text-2xl font-extrabold mb-4">{feature.title}</h3>
+              <p className="text-secondary leading-relaxed text-lg">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Trending Products */}
+      <section>
+        <div className="text-center mb-16">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-text mb-6">Trending This Week</h2>
+          <p className="text-secondary text-base max-w-2xl mx-auto">Discover the most loved selections by our community this week. Grab yours before they are gone!</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {isLoading ? (
+            Array(4).fill(0).map((_, i) => (
+              <div key={i} className="space-y-4">
+                <Skeleton className="h-80 rounded-[40px]" />
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-6 w-1/4" />
+              </div>
+            ))
+          ) : (
+            products?.map((product) => (
+              <Card key={product._id} className="group flex flex-col h-full bg-white border border-gray-50 rounded-[40px] hover:shadow-2xl transition-all duration-500">
+                <Link to={`/products/${product._id}`} className="relative h-80 overflow-hidden rounded-[40px] m-2">
+                  <img
+                    src={product.images[0]?.url || 'https://via.placeholder.com/400'}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-24 group-hover:translate-x-0 transition-transform">
+                    <button
+                      onClick={(e) => handleToggleWishlist(e, product._id)}
+                      className={`w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-xl flex items-center justify-center transition-all ${
+                        isInWishlist(product._id) ? 'text-primary' : 'text-text hover:text-primary'
+                      }`}
+                    >
+                      <Heart size={22} fill={isInWishlist(product._id) ? "currentColor" : "none"} />
+                    </button>
+                  </div>
+                  {product.stock <= 0 && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+                      <span className="bg-red-500 text-white px-6 py-2 rounded-full font-extrabold uppercase text-xs tracking-widest shadow-xl">Sold Out</span>
+                    </div>
+                  )}
+                </Link>
+                <div className="p-8 flex-grow flex flex-col">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest">{product.category}</span>
+                    <div className="flex items-center gap-1.5 text-accent">
+                      <Star size={18} fill="currentColor" />
+                      <span className="font-bold">{product.ratingsAverage}</span>
+                    </div>
+                  </div>
+                  <Link to={`/products/${product._id}`} className="hover:text-primary transition-colors">
+                    <h3 className="text-2xl font-extrabold mb-3 line-clamp-1">{product.name}</h3>
+                  </Link>
+                  <p className="text-secondary text-base mb-6 line-clamp-2 flex-grow">{product.description}</p>
+                  <div className="flex justify-between items-center pt-6 border-t border-gray-50">
+                    <span className="text-3xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
+                    <Link to={`/products/${product._id}`}>
+                        <div className="bg-background hover:bg-primary hover:text-white p-4 rounded-2xl text-text transition-all active:scale-90">
+                           <ArrowRight size={24} />
+                        </div>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+        
+        <div className="mt-20 text-center">
+            <Link to="/products">
+                <Button size="lg" variant="outline" className="rounded-2xl px-12 group">
+                    Explore All Masterpieces <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+            </Link>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-background rounded-[60px] p-8 sm:p-20 text-center relative overflow-hidden ring-1 ring-primary/10">
+         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -mr-48 -mt-48" />
+         <div className="relative z-10">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text mb-6">Need a Custom Creation?</h2>
+            <p className="text-secondary text-lg mb-12 max-w-2xl mx-auto leading-relaxed">
+                Whether it's a dream wedding cake or a personalized birthday surprise, our master bakers are ready to bring your vision to life.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+                <Link to="/products?category=Custom">
+                    <Button size="lg" className="rounded-2xl px-12 shadow-xl shadow-primary/20 h-16 text-lg">
+                        Request Custom Cake
+                    </Button>
+                </Link>
+                <Link to="/products">
+                    <Button variant="outline" size="lg" className="rounded-2xl px-12 h-16 text-lg">
+                        Browse Gallery
+                    </Button>
+                </Link>
+            </div>
+         </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;

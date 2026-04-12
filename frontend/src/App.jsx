@@ -1,0 +1,85 @@
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import AdminLayout from './components/layout/AdminLayout';
+
+// Customer Pages
+import Home from './pages/customer/Home';
+import ProductList from './pages/customer/ProductList';
+import ProductDetails from './pages/customer/ProductDetails';
+import Cart from './pages/customer/Cart';
+import Login from './pages/customer/Login';
+import Signup from './pages/customer/Signup';
+import Checkout from './pages/customer/Checkout';
+import Orders from './pages/customer/Orders';
+import Wishlist from './pages/customer/Wishlist';
+
+// Admin Pages
+import AdminDashboard from './pages/admin/Dashboard';
+import ProductManagement from './pages/admin/ProductManagement';
+import OrderManagement from './pages/admin/OrderManagement';
+import CategoryManagement from './pages/admin/CategoryManagement';
+import BannerManagement from './pages/admin/BannerManagement';
+
+const ProtectedRoute = ({ children, isAdmin = false }) => {
+  const { user } = useSelector((state) => state.auth);
+  if (!user) return <Navigate to="/login" replace />;
+  if (isAdmin && user.role !== 'admin') return <Navigate to="/" replace />;
+  return children;
+};
+
+// Layout for customer routes
+const CustomerContainer = () => (
+  <div className="flex flex-col min-h-screen">
+    <Navbar />
+    <main className="flex-grow container mx-auto px-4 md:px-8 lg:px-16 xl:px-24 py-8 max-w-[1536px]">
+      <Outlet />
+    </main>
+    <Footer />
+  </div>
+);
+
+// Layout for admin routes
+const AdminContainer = () => (
+  <ProtectedRoute isAdmin={true}>
+    <AdminLayout>
+      <Outlet />
+    </AdminLayout>
+  </ProtectedRoute>
+);
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Admin Routes */}
+        <Route element={<AdminContainer />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<ProductManagement />} />
+          <Route path="/admin/orders" element={<OrderManagement />} />
+          <Route path="/admin/categories" element={<CategoryManagement />} />
+          <Route path="/admin/banners" element={<BannerManagement />} />
+        </Route>
+
+        {/* Customer Routes */}
+        <Route element={<CustomerContainer />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<ProductList />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          
+          {/* Catch-all for non-existent routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

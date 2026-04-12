@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FF6F61;
+  --color-secondary: #6B7280;
+  --color-accent: #FDE047;
+  --color-background: #FFF7F5;
+  --color-text: #1F2937;
+  
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text font-sans;
+  }
+}
+
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/30;
+}
+
+.btn-primary {
+  @apply bg-primary text-white px-6 py-2 rounded-full hover:opacity-90 transition-all active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-white px-6 py-2 rounded-full hover:opacity-90 transition-all active:scale-95;
+}
+
+.card {
+  @apply bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden;
+}
+
+/* Fix all input focus borders — no black outlines */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  border-color: rgba(255, 111, 97, 0.4) !important;
+  box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.1) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 111, 97, 0.5);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
