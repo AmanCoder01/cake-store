@@ -202,8 +202,8 @@ const Home = () => {
             ))
           ) : (
             products?.map((product) => (
-              <Card key={product._id} className="group flex flex-col h-full bg-white border border-gray-50 rounded-[40px] hover:shadow-2xl transition-all duration-500">
-                <Link to={`/products/${product._id}`} className="relative h-80 overflow-hidden rounded-[40px] m-2">
+              <Card key={product._id} className="group flex flex-col h-full bg-white border border-gray-50 rounded-[32px] hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                <Link to={`/products/${product._id}`} className="relative h-64 overflow-hidden rounded-[24px] m-2">
                   <img
                     src={product.images[0]?.url || 'https://via.placeholder.com/400'}
                     alt={product.name}
@@ -225,25 +225,25 @@ const Home = () => {
                     </div>
                   )}
                 </Link>
-                <div className="p-8 flex-grow flex flex-col">
+                <div className="p-6 flex-grow flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest">{product.category}</span>
                     <div className="flex items-center gap-1.5 text-accent">
-                      <Star size={18} fill="currentColor" />
-                      <span className="font-bold">{product.ratingsAverage}</span>
+                      <Star size={16} fill="currentColor" />
+                      <span className="font-bold text-sm">{product.ratingsAverage}</span>
                     </div>
                   </div>
                   <Link to={`/products/${product._id}`} className="hover:text-primary transition-colors">
-                    <h3 className="text-2xl font-extrabold mb-3 line-clamp-1">{product.name}</h3>
+                    <h3 className="text-xl font-extrabold mb-2 line-clamp-1">{product.name}</h3>
                   </Link>
                   <div className="flex-grow">
-                    <p className="text-secondary text-base mb-6 line-clamp-2">{product.description}</p>
+                    <p className="text-secondary text-sm mb-4 line-clamp-2">{product.description}</p>
                   </div>
-                  <div className="flex justify-between items-center pt-6 border-t border-gray-50">
-                    <span className="text-3xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                    <span className="text-2xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
                     <Link to={`/products/${product._id}`}>
-                        <div className="bg-background hover:bg-primary hover:text-white p-4 rounded-2xl text-text transition-all active:scale-90">
-                           <ArrowRight size={24} />
+                        <div className="bg-background hover:bg-primary hover:text-white p-3 rounded-xl text-text transition-all active:scale-90">
+                           <ArrowRight size={20} />
                         </div>
                     </Link>
                   </div>
