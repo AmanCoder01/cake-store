@@ -13,6 +13,7 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { token } = useSelector((state) => state.auth);
+  const [reviewedProductIds, setReviewedProductIds] = useState([]);
 
   // Review modal states
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -50,6 +51,7 @@ const Orders = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Thank you! Your review has been submitted.');
+      setReviewedProductIds(prev => [...prev, reviewProductId]);
       handleCloseReviewModal();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit review');
@@ -59,20 +61,28 @@ const Orders = () => {
   };
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrdersAndReviews = async () => {
       try {
-        const { data } = await axios.get(`${APP_CONFIG.API_BASE_URL}/orders/myorders`, {
+        // Fetch orders
+        const ordersRes = await axios.get(`${APP_CONFIG.API_BASE_URL}/orders/myorders`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setOrders(data.data.orders);
+        setOrders(ordersRes.data.data.orders);
+
+        // Fetch user reviews
+        const reviewsRes = await axios.get(`${APP_CONFIG.API_BASE_URL}/reviews/myreviews`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const productIds = reviewsRes.data.data.reviews.map(r => r.product);
+        setReviewedProductIds(productIds);
       } catch (error) {
-        toast.error('Failed to fetch orders');
+        toast.error('Failed to fetch orders history');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders();
+    fetchOrdersAndReviews();
   }, [token]);
 
   const getStatusStyle = (status) => {
@@ -169,12 +179,18 @@ const Orders = () => {
                             <p className="text-xs text-secondary font-bold">{item.quantity} x ₹{item.price}</p>
                           </div>
                           {order.status === 'Delivered' && (
-                            <button
-                              onClick={() => handleOpenReviewModal(item.product, item.name)}
-                              className="ml-2 px-3 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-extrabold transition-all duration-300 shadow-sm"
-                            >
-                              Review
-                            </button>
+                            reviewedProductIds.includes(item.product) ? (
+                              <span className="ml-2 px-3 py-1.5 bg-green-50 text-green-500 rounded-xl text-xs font-extrabold border border-green-100 flex items-center gap-1">
+                                <CheckCircle2 size={12} fill="currentColor" className="text-green-100" /> Reviewed
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleOpenReviewModal(item.product, item.name)}
+                                className="ml-2 px-3 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-extrabold transition-all duration-300 shadow-sm"
+                              >
+                                Review
+                              </button>
+                            )
                           )}
                         </div>
                       ))}

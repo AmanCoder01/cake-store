@@ -80,3 +80,20 @@ exports.createReview = async (req, res) => {
     });
   }
 };
+
+// GET /api/reviews/myreviews — Get all reviews written by the logged-in user
+exports.getMyReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find({ user: req.user._id });
+    res.status(200).json({
+      status: 'success',
+      results: reviews.length,
+      data: { reviews }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
