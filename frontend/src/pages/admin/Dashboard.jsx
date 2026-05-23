@@ -47,6 +47,7 @@ const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { token } = useSelector((state) => state.auth);
+  const [timeFrame, setTimeFrame] = useState('Last 7 Days');
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -70,19 +71,54 @@ const AdminDashboard = () => {
     fetchAdminData();
   }, [token]);
 
+  const getChartData = () => {
+    if (!stats?.revenueStats) return { labels: [], data: [], numDays: 7 };
+
+    let numDays = 7;
+    if (timeFrame === 'Last 30 Days') numDays = 30;
+    else if (timeFrame === 'Year to Date') numDays = 90;
+
+    const labels = [];
+    const data = [];
+
+    const statsMap = {};
+    stats.revenueStats.forEach(s => {
+      statsMap[s._id] = s.revenue;
+    });
+
+    for (let i = numDays - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
+      const displayLabel = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      labels.push(displayLabel);
+      data.push(statsMap[dateStr] || 0);
+    }
+
+    return { labels, data, numDays };
+  };
+
+  const { labels, data, numDays } = getChartData();
+
   const chartData = {
-    labels: stats?.revenueStats?.map(s => s._id) || [],
+    labels,
     datasets: [
       {
         label: 'Revenue',
-        data: stats?.revenueStats?.map(s => s.revenue) || [],
+        data,
         fill: true,
         backgroundColor: 'rgba(255, 111, 97, 0.1)',
         borderColor: '#FF6F61',
         tension: 0.4,
         pointBackgroundColor: '#FF6F61',
         pointBorderWidth: 2,
-        pointRadius: 4,
+        pointRadius: numDays > 30 ? 1 : 4,
       },
     ],
   };
@@ -152,10 +188,14 @@ const AdminDashboard = () => {
               <TrendingUp className="text-primary" /> Revenue Analytics
             </h3>
             {!loading && (
-              <select className="bg-background px-4 py-2 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-primary/20 cursor-pointer">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-                <option>Year to Date</option>
+              <select 
+                value={timeFrame}
+                onChange={(e) => setTimeFrame(e.target.value)}
+                className="bg-background px-4 py-2 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-primary/20 cursor-pointer"
+              >
+                <option value="Last 7 Days">Last 7 Days</option>
+                <option value="Last 30 Days">Last 30 Days</option>
+                <option value="Year to Date">Year to Date</option>
               </select>
             )}
           </div>
