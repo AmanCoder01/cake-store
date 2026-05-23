@@ -114,13 +114,13 @@ const ProductDetails = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* breadcrumbs */}
-      <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-secondary mb-8 sm:mb-12 overflow-x-auto whitespace-nowrap scrollbar-hide pb-1">
-        <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-        <ChevronRight size={14} />
-        <Link to="/products" className="hover:text-primary transition-colors">Cakes</Link>
-        <ChevronRight size={14} />
+      <div className="flex items-center flex-wrap gap-y-1 text-xs sm:text-sm font-bold text-secondary mb-8 sm:mb-12">
+        <Link to="/" className="hover:text-primary transition-colors !min-h-0">Home</Link>
+        <span className="px-2 text-secondary/30 select-none font-normal">/</span>
+        <Link to="/products" className="hover:text-primary transition-colors !min-h-0">Cakes</Link>
+        <span className="px-2 text-secondary/30 select-none font-normal">/</span>
         <span className="text-text">{product.name}</span>
-      </nav>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 lg:gap-24">
         {/* image gallery */}

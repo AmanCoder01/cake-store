@@ -44,33 +44,41 @@ const Navbar = () => {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link to="/wishlist" className="text-text hover:text-primary transition-colors">
-            <Heart size={22} />
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link 
+            to="/wishlist" 
+            className="text-text hover:text-primary w-9 h-9 flex items-center justify-center rounded-full hover:bg-primary/5 transition-all shrink-0"
+            title="Wishlist"
+          >
+            <Heart size={20} />
           </Link>
-          <Link to="/cart" className="relative group">
-            <ShoppingCart className="text-text group-hover:text-primary transition-colors" size={22} />
+          <Link 
+            to="/cart" 
+            className="relative text-text hover:text-primary w-9 h-9 flex items-center justify-center rounded-full hover:bg-primary/5 transition-all shrink-0"
+            title="Cart"
+          >
+            <ShoppingCart size={20} />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] w-4.5 h-4.5 flex items-center justify-center rounded-full font-black shadow-sm">
                 {cartCount}
               </span>
             )}
           </Link>
 
           {user ? (
-            <div className="hidden sm:flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-3">
               <Link to={user.role === 'admin' ? '/admin' : '/orders'} className="flex items-center gap-2 group">
-                <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
-                  <User size={18} />
+                <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                  <User size={16} />
                 </div>
-                <span className="hidden lg:inline font-medium text-sm">{user.name.split(' ')[0]}</span>
+                <span className="hidden lg:inline font-bold text-sm">{user.name.split(' ')[0]}</span>
               </Link>
               <button 
                 onClick={handleLogout}
-                className="text-text hover:text-red-500 transition-colors"
+                className="text-text hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 transition-all shrink-0"
                 title="Logout"
               >
-                <LogOut size={20} />
+                <LogOut size={18} />
               </button>
             </div>
           ) : (
@@ -82,9 +90,10 @@ const Navbar = () => {
           {/* Mobile hamburger */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-text hover:text-primary transition-colors"
+            className="md:hidden w-9 h-9 flex items-center justify-center text-text hover:text-primary rounded-full hover:bg-primary/5 transition-all shrink-0"
+            aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
