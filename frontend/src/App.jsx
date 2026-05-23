@@ -33,6 +33,7 @@ import ProductManagement from './pages/admin/ProductManagement';
 import OrderManagement from './pages/admin/OrderManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
 import BannerManagement from './pages/admin/BannerManagement';
+import AdminNotifications from './pages/admin/AdminNotifications';
 
 const ProtectedRoute = ({ children, isAdmin = false }) => {
   const { user } = useSelector((state) => state.auth);
@@ -73,6 +74,7 @@ function App() {
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route path="/admin/categories" element={<CategoryManagement />} />
           <Route path="/admin/banners" element={<BannerManagement />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
         </Route>
 
         {/* Customer Routes */}

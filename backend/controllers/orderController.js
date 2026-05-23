@@ -1,5 +1,7 @@
 const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
+const User = require('../models/userModel');
+const Notification = require('../models/notificationModel');
 
 exports.createOrder = async (req, res) => {
   try {
@@ -22,6 +24,34 @@ exports.createOrder = async (req, res) => {
       await Product.findByIdAndUpdate(item.product, {
         $inc: { stock: -item.quantity }
       });
+    }
+
+    // Create notifications for all admin users
+    try {
+      const admins = await User.find({ role: 'admin' });
+      const notifications = await Notification.insertMany(
+        admins.map(admin => ({
+          recipient: admin._id,
+          type: 'NEW_ORDER',
+          title: 'New Order Placed! 🎂',
+          message: `Order #${order._id.toString().substring(18)} for $${order.totalPrice} has been placed.`,
+          orderId: order._id
+        }))
+      );
+
+      // Emit Socket.io event to online admins
+      const io = req.app.get('io');
+      const activeSockets = req.app.get('activeSockets');
+      if (io && activeSockets) {
+        notifications.forEach(notif => {
+          const socketId = activeSockets.get(notif.recipient.toString());
+          if (socketId) {
+            io.to(socketId).emit('new-notification', notif);
+          }
+        });
+      }
+    } catch (notifErr) {
+      console.error('Failed to send order notifications:', notifErr);
     }
 
     res.status(201).json({ status: 'success', data: { order } });
@@ -63,6 +93,30 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
+
+    // Create notification for the customer
+    try {
+      const notification = await Notification.create({
+        recipient: order.user,
+        type: 'ORDER_STATUS_UPDATE',
+        title: 'Order Status Updated! 🚚',
+        message: `Your order #${order._id.toString().substring(18)} status is now "${order.status}".`,
+        orderId: order._id
+      });
+
+      // Emit Socket.io event in real-time to the online customer
+      const io = req.app.get('io');
+      const activeSockets = req.app.get('activeSockets');
+      if (io && activeSockets) {
+        const socketId = activeSockets.get(order.user.toString());
+        if (socketId) {
+          io.to(socketId).emit('new-notification', notification);
+        }
+      }
+    } catch (notifErr) {
+      console.error('Failed to create status update notification:', notifErr);
+    }
+
     res.status(200).json({ status: 'success', data: { order } });
   } catch (err) {
     res.status(400).json({ status: 'fail', message: err.message });

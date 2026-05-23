@@ -2,6 +2,8 @@
 require('node:dns/promises').setServers(['8.8.8.8', '1.1.1.1']);
 
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -15,6 +17,39 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS']
+  }
+});
+
+// Map to track active connections (userId -> socketId)
+const activeSockets = new Map();
+
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  socket.on('register', (userId) => {
+    if (userId) {
+      socket.userId = userId;
+      activeSockets.set(userId, socket.id);
+      console.log(`Socket ${socket.id} registered for user ${userId}`);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected:', socket.id);
+    if (socket.userId) {
+      activeSockets.delete(socket.userId);
+    }
+  });
+});
+
+app.set('io', io);
+app.set('activeSockets', activeSockets);
+
 
 // Trust Vercel Proxy (fixes Rate Limiter header errors)
 app.set('trust proxy', 1);
@@ -73,6 +108,7 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const bannerRoutes = require('./routes/bannerRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const errorMiddleware = require('./middleware/errorMiddleware');
 
@@ -85,6 +121,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Catch-all route for undefined routes
 app.use((req, res, next) => {
@@ -107,7 +144,7 @@ mongoose.connect(DB).then(() => {
 
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 }

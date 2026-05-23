@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ShoppingCart, User, LogOut, Cake, LayoutDashboard, Menu, X, Heart } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Cake, LayoutDashboard, Menu, X, Heart, Bell } from 'lucide-react';
 import { logout } from '../../store/slices/authSlice';
 import { APP_CONFIG } from '../../config/constants';
 import { useState } from 'react';
+import { useNotifications } from '../../context/NotificationContext';
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -11,6 +12,9 @@ const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -64,6 +68,86 @@ const Navbar = () => {
               </span>
             )}
           </Link>
+
+          {user && (
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="relative text-text hover:text-primary w-9 h-9 flex items-center justify-center rounded-full hover:bg-primary/5 transition-all shrink-0 cursor-pointer"
+                title="Notifications"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] w-4.5 h-4.5 flex items-center justify-center rounded-full font-black shadow-sm animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notifOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-100 rounded-3xl shadow-2xl p-4 z-50 animate-fade-in max-h-[400px] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-50">
+                      <span className="font-black text-sm text-text">Notifications</span>
+                      {unreadCount > 0 && (
+                        <button 
+                          onClick={markAllAsRead}
+                          className="text-xs font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 text-left">
+                      {notifications.length === 0 ? (
+                        <p className="text-xs text-center text-secondary py-6 font-semibold">No notifications yet</p>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div 
+                            key={notif._id} 
+                            onClick={() => {
+                              markAsRead(notif._id);
+                              if (notif.orderId) {
+                                navigate(user.role === 'admin' ? '/admin/orders' : '/orders');
+                              }
+                              setNotifOpen(false);
+                            }}
+                            className={`p-3 rounded-2xl cursor-pointer text-left transition-all ${
+                              notif.isRead 
+                                ? 'bg-transparent hover:bg-gray-50' 
+                                : 'bg-primary/5 hover:bg-primary/10 border-l-2 border-primary'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-1">
+                              <p className={`text-xs font-black text-text ${!notif.isRead && 'text-primary'}`}>
+                                {notif.title}
+                              </p>
+                              {!notif.isRead && (
+                                <span className="w-1.5 h-1.5 bg-primary rounded-full shrink-0 mt-1" />
+                              )}
+                            </div>
+                            <p className="text-[11px] font-semibold text-secondary mt-0.5 leading-snug">
+                              {notif.message}
+                            </p>
+                            <span className="text-[9px] text-gray-400 font-bold block mt-1.5">
+                              {new Date(notif.createdAt).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {user ? (
             <div className="hidden sm:flex items-center gap-3">

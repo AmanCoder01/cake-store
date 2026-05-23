@@ -9,14 +9,17 @@ import {
   Settings,
   ChevronRight,
   LogOut,
-  X
+  X,
+  Bell
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
+import { useNotifications } from '../../context/NotificationContext';
 
 const AdminSidebar = ({ onClose }) => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const { unreadCount } = useNotifications();
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -24,6 +27,7 @@ const AdminSidebar = ({ onClose }) => {
     { name: 'Orders', path: '/admin/orders', icon: <TrendingUp size={20} /> },
     { name: 'Categories', path: '/admin/categories', icon: <Layers size={20} /> },
     { name: 'Banners', path: '/admin/banners', icon: <ImageIcon size={20} /> },
+    { name: 'Notifications', path: '/admin/notifications', icon: <Bell size={20} /> },
   ];
 
   const handleLogout = () => {
@@ -68,6 +72,13 @@ const AdminSidebar = ({ onClose }) => {
               <div className="flex items-center gap-3 font-bold">
                 {item.icon}
                 <span>{item.name}</span>
+                {item.name === 'Notifications' && unreadCount > 0 && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-black text-white shrink-0 ml-1 shadow-sm ${
+                    isActive ? 'bg-white text-primary' : 'bg-primary animate-pulse'
+                  }`}>
+                    {unreadCount}
+                  </span>
+                )}
               </div>
               {isActive && <ChevronRight size={16} />}
             </Link>
