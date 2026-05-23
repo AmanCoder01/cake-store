@@ -15,6 +15,22 @@ export const useNotifications = () => {
   return context;
 };
 
+// Helper function to convert base64 VAPID key to Uint8Array for PushManager
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export const NotificationProvider = ({ children }) => {
   const { user, token } = useSelector((state) => state.auth);
   const [notifications, setNotifications] = useState([]);
@@ -29,14 +45,54 @@ export const NotificationProvider = ({ children }) => {
     }
   });
 
-  // Request browser Notification API permission
+  const registerPushNotifications = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.log('Push notifications are not supported on this browser.');
+      return;
+    }
+
+    try {
+      // Register Service Worker from public folder
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker successfully registered with scope:', registration.scope);
+
+      // Subscribe to Push Manager
+      let subscription = await registration.pushManager.getSubscription();
+
+      if (!subscription) {
+        const convertedVapidKey = urlBase64ToUint8Array(APP_CONFIG.VAPID_PUBLIC_KEY);
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+        });
+        console.log('Created new Web Push Subscription:', subscription);
+      }
+
+      // Save subscription details to backend database
+      await axios.post(
+        `${APP_CONFIG.API_BASE_URL}/notifications/subscribe`,
+        subscription,
+        getAxiosConfig()
+      );
+      console.log('Registered Push Subscription with backend successfully.');
+    } catch (err) {
+      console.error('Error registering web push notifications:', err);
+    }
+  };
+
+  // Request browser Notification API permission & Register Service Worker Push Notifications
   useEffect(() => {
-    if (user && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          console.log('System Notification permission granted.');
-        }
-      }).catch(console.error);
+    if (user) {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            console.log('System Notification permission granted.');
+            registerPushNotifications();
+          }
+        }).catch(console.error);
+      } else if ('Notification' in window && Notification.permission === 'granted') {
+        registerPushNotifications();
+      }
     }
   }, [user]);
 

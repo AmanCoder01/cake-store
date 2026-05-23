@@ -7,6 +7,7 @@ export const APP_CONFIG = {
         ? `http://${window.location.hostname}:5000/api` 
         : "http://localhost:5000/api"
   ),
+  VAPID_PUBLIC_KEY: "BPyBN0a6h6X207ASr052BcRPflQVydhoYlhHoyneC9Bn3qC6D7PFiIx-fi9YbOKm8Z_oSIhQXV0PUEKK810wO3g",
 
   COLORS: {
     PRIMARY: "#FF6F61", // Vibrant coral

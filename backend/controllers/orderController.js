@@ -50,6 +50,17 @@ exports.createOrder = async (req, res) => {
           }
         });
       }
+
+      // Send Web Push notification to all admins (even if browser is closed)
+      const { sendPushNotification } = require('./notificationController');
+      notifications.forEach(notif => {
+        sendPushNotification(
+          notif.recipient,
+          notif.title,
+          notif.message,
+          '/admin/orders'
+        );
+      });
     } catch (notifErr) {
       console.error('Failed to send order notifications:', notifErr);
     }
@@ -113,6 +124,15 @@ exports.updateOrderStatus = async (req, res) => {
           io.to(socketId).emit('new-notification', notification);
         }
       }
+
+      // Send Web Push notification to the customer (even if browser is closed)
+      const { sendPushNotification } = require('./notificationController');
+      sendPushNotification(
+        notification.recipient,
+        notification.title,
+        notification.message,
+        '/orders'
+      );
     } catch (notifErr) {
       console.error('Failed to create status update notification:', notifErr);
     }
