@@ -1,6 +1,6 @@
 export const APP_CONFIG = {
   APP_NAME: "Cake Baker's",
-  API_BASE_URL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "https://cake-store-xi.vercel.app/api" : "http://localhost:5000/api"),
+  API_BASE_URL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/api" : "http://localhost:5000/api"),
 
   COLORS: {
     PRIMARY: "#FF6F61", // Vibrant coral
