@@ -23,8 +23,16 @@
       "dest": "backend/server.js"
     },
     {
-      "src": "/(.*)",
+      "src": "/((?!api|uploads|assets).+\\.[a-zA-Z0-9]+)$",
       "dest": "frontend/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "frontend/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/index.html"
     }
   ]
 }
