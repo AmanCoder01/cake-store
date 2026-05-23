@@ -202,10 +202,10 @@ const ProductManagement = () => {
     <div className="space-y-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-4xl font-black text-text mb-2">Bakery Inventory</h1>
-          <p className="text-secondary font-medium">Manage your cake listings and stock levels.</p>
+          <h1 className="text-2xl sm:text-4xl font-black text-text mb-1">Bakery Inventory</h1>
+          <p className="text-secondary text-sm sm:text-base font-medium">Manage your cake listings and stock levels.</p>
         </div>
-        <Button onClick={handleAddProduct} size="lg" className="rounded-2xl shadow-xl shadow-primary/20 w-full md:w-auto">
+        <Button onClick={handleAddProduct} size="lg" className="rounded-2xl shadow-xl shadow-primary/20 w-full md:w-auto whitespace-nowrap shrink-0">
           <Plus size={20} className="mr-2" /> Add New Cake
         </Button>
       </div>

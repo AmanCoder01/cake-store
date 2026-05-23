@@ -62,24 +62,31 @@ const Wishlist = () => {
       </div>
 
       {safeItems.length === 0 && !isLoading ? (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl sm:rounded-[40px] p-10 sm:p-20 text-center shadow-sm border border-gray-50 mt-12"
-        >
-          <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-8">
-            <Heart size={48} />
-          </div>
-          <h2 className="text-3xl font-extrabold text-text mb-4">Your wishlist is empty</h2>
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.12, 1, 1.12, 1],
+            }}
+            transition={{ 
+              duration: 1.8, 
+              ease: "easeInOut", 
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+            className="w-32 h-32 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-8 shadow-sm shadow-red-100"
+          >
+            <Heart size={48} className="fill-red-500/20 text-red-500" />
+          </motion.div>
+          <h2 className="text-2xl sm:text-4xl font-black text-text mb-4">Your wishlist is empty</h2>
           <p className="text-secondary text-lg mb-10 max-w-md mx-auto">
             Looks like you haven't saved any masterpieces yet. Start exploring our delicious collections!
           </p>
           <Link to="/products">
-            <Button size="lg" className="rounded-2xl px-10 shadow-xl shadow-primary/20">
-              Browse Cakes <ArrowRight size={20} className="ml-2" />
+            <Button size="lg" className="rounded-2xl px-10 shadow-lg hover:shadow-xl transition-all">
+              Browse Cakes
             </Button>
           </Link>
-        </motion.div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           <AnimatePresence>

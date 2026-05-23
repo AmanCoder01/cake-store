@@ -98,11 +98,11 @@ const BannerManagement = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black text-text">Banner Management</h1>
-          <p className="text-secondary">Control the promotional sliders at the top of your site</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-text mb-1">Banner Management</h1>
+          <p className="text-secondary text-sm sm:text-base">Control the promotional sliders at the top of your site</p>
         </div>
         {!showForm && (
-          <Button onClick={() => setShowForm(true)} className="rounded-2xl">
+          <Button onClick={() => setShowForm(true)} className="rounded-2xl whitespace-nowrap shrink-0">
             <Plus size={20} className="mr-2" /> New Banner
           </Button>
         )}

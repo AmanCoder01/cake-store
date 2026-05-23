@@ -122,14 +122,14 @@ const CategoryManagement = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black text-text">Categories</h1>
-          <p className="text-secondary">Manage your product categories & images</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-text mb-1">Categories</h1>
+          <p className="text-secondary text-sm sm:text-base">Manage your product categories & images</p>
         </div>
-        {!isEditing && (
-          <Button onClick={() => setIsEditing(true)} className="rounded-2xl">
-            <Plus size={20} className="mr-2" /> Add Category
-          </Button>
-        )}
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)} className="rounded-2xl whitespace-nowrap shrink-0">
+              <Plus size={20} className="mr-2" /> Add Category
+            </Button>
+          )}
       </div>
 
       {isEditing && (
@@ -163,7 +163,7 @@ const CategoryManagement = () => {
                 <label className="block text-sm font-black text-text mb-2 uppercase tracking-wider">Category Image</label>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="relative h-full min-h-[200px] rounded-3xl border-2 border-dashed border-gray-200 bg-white flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-primary/40 transition-all group"
+                  className="relative h-64 md:h-full min-h-[200px] rounded-3xl border-2 border-dashed border-gray-200 bg-white flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-primary/40 transition-all group"
                 >
                   {currentCategory.image?.url ? (
                     <>
