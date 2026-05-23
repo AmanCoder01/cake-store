@@ -47,13 +47,13 @@ const Login = () => {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full bg-white rounded-[40px] p-10 shadow-2xl shadow-orange-500/5 border border-gray-50"
+        className="max-w-md w-full bg-white rounded-3xl sm:rounded-[40px] p-6 sm:p-10 shadow-2xl shadow-orange-500/5 border border-gray-50"
       >
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Cake size={32} />
           </div>
-          <h2 className="text-4xl font-black text-text mb-2">Welcome Back</h2>
+          <h2 className="text-2xl sm:text-4xl font-black text-text mb-2">Welcome Back</h2>
           <p className="text-secondary font-medium">Sweet cravings are just a logout away!</p>
         </div>
 

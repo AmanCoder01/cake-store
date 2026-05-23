@@ -65,7 +65,7 @@ const Wishlist = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[40px] p-20 text-center shadow-sm border border-gray-50 mt-12"
+          className="bg-white rounded-3xl sm:rounded-[40px] p-10 sm:p-20 text-center shadow-sm border border-gray-50 mt-12"
         >
           <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-8">
             <Heart size={48} />

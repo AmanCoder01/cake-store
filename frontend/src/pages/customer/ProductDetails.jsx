@@ -114,7 +114,7 @@ const ProductDetails = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* breadcrumbs */}
-      <nav className="flex items-center gap-2 text-sm font-bold text-secondary mb-12">
+      <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-secondary mb-8 sm:mb-12 overflow-x-auto whitespace-nowrap scrollbar-hide pb-1">
         <Link to="/" className="hover:text-primary transition-colors">Home</Link>
         <ChevronRight size={14} />
         <Link to="/products" className="hover:text-primary transition-colors">Cakes</Link>
@@ -174,9 +174,9 @@ const ProductDetails = () => {
 
           <h1 className="text-3xl sm:text-5xl font-black text-text mb-4 sm:mb-6 leading-tight">{product.name}</h1>
           
-          <div className="flex items-baseline gap-4 mb-8">
-            <span className="text-3xl sm:text-4xl font-black text-primary">₹{product.price}</span>
-            <span className="text-lg text-secondary line-through">₹{(product.price * 1.2).toFixed(2)}</span>
+          <div className="flex flex-wrap items-baseline gap-3 mb-8">
+            <span className="text-2xl sm:text-4xl font-black text-primary">₹{product.price}</span>
+            <span className="text-base sm:text-lg text-secondary line-through">₹{(product.price * 1.2).toFixed(2)}</span>
             <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold uppercase">Save 20%</span>
           </div>
 
@@ -277,7 +277,7 @@ const ProductDetails = () => {
             <Skeleton className="h-64 md:col-span-2 rounded-3xl" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             {/* Rating Summary Breakdown Card */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-sm h-fit">
               <h3 className="text-lg font-extrabold text-text mb-6">Rating Summary</h3>

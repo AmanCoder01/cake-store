@@ -88,8 +88,8 @@ const OrderManagement = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="overflow-x-auto -mx-1">
+          <table className="w-full text-left min-w-[640px]">
             <thead className="bg-gray-50/50 text-secondary text-xs font-black uppercase tracking-widest">
               <tr>
                 <th className="px-8 py-6">Order Details</th>

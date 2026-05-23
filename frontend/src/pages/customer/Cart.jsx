@@ -27,7 +27,7 @@ const Cart = () => {
         <div className="w-32 h-32 bg-orange-50 text-primary rounded-full flex items-center justify-center mb-8 animate-bounce">
           <ShoppingBag size={48} />
         </div>
-        <h2 className="text-4xl font-black text-text mb-4">Your cart is empty</h2>
+        <h2 className="text-2xl sm:text-4xl font-black text-text mb-4">Your cart is empty</h2>
         <p className="text-secondary max-w-md mb-10 text-lg">
           Looks like you haven't added any sweet treats yet. Start exploring our delicious collections!
         </p>
@@ -58,7 +58,7 @@ const Cart = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-50 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 group"
+                className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-50 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 group"
               >
                 <Link to={`/products/${item.product}`} className="w-32 h-32 rounded-2xl overflow-hidden shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />

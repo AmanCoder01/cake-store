@@ -82,3 +82,23 @@ select:focus {
   animation: shimmer 2s infinite linear;
 }
 
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Prevent horizontal overflow (page bounce on mobile) */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Touch-friendly tap target minimum size on mobile */
+@media (max-width: 640px) {
+  button, a {
+    min-height: 36px;
+  }
+}

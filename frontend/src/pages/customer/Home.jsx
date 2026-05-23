@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Heart, Clock, Truck, ShieldCheck, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
@@ -69,9 +69,9 @@ const Home = () => {
       <Meta title="Home" description="Freshly baked happiness delivered to your door." />
 
       {/* Hero Banners */}
-      <section className="relative h-[450px] sm:h-[650px] overflow-hidden rounded-[40px] sm:rounded-[60px] shadow-2xl">
+      <section className="relative h-[300px] sm:h-[520px] lg:h-[650px] overflow-hidden rounded-2xl sm:rounded-[50px] lg:rounded-[60px] shadow-2xl">
         {isLoading ? (
-          <Skeleton className="w-full h-full rounded-[60px]" />
+          <Skeleton className="w-full h-full" />
         ) : (
           <div className="relative h-full">
             <AnimatePresence mode="wait">
@@ -84,14 +84,18 @@ const Home = () => {
                   transition={{ duration: 1 }}
                   className="absolute inset-0"
                 >
-                  <img src={banners[currentBanner].image.url} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex items-center p-8 sm:p-24">
-                    <div className="max-w-2xl space-y-6 sm:space-y-8">
+                  <img src={banners[currentBanner].image.url} className="w-full h-full object-cover" alt={banners[currentBanner].title} />
+                  {/* Gradient overlay — stronger on mobile for readability */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10 sm:via-black/40 sm:to-transparent" />
+                  
+                  {/* Content — bottom-anchored on mobile, centered-left on desktop */}
+                  <div className="absolute inset-0 flex items-end sm:items-center p-5 sm:p-14 lg:p-24 pb-12 sm:pb-14">
+                    <div className="w-full sm:max-w-2xl space-y-2 sm:space-y-5">
                        <motion.span 
                          initial={{ y: 20, opacity: 0 }}
                          animate={{ y: 0, opacity: 1 }}
                          transition={{ delay: 0.2 }}
-                         className="inline-block bg-primary px-6 py-2 rounded-full text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/30"
+                         className="inline-block bg-primary/90 backdrop-blur-sm px-3 py-1 sm:px-6 sm:py-2 rounded-full text-white text-[10px] sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/30 max-w-[85vw] line-clamp-2 leading-snug"
                        >
                          {banners[currentBanner].subtitle}
                        </motion.span>
@@ -99,7 +103,7 @@ const Home = () => {
                          initial={{ y: 20, opacity: 0 }}
                          animate={{ y: 0, opacity: 1 }}
                          transition={{ delay: 0.4 }}
-                         className="text-4xl sm:text-7xl font-black text-white leading-[1.1]"
+                         className="text-xl sm:text-5xl lg:text-7xl font-black text-white leading-tight sm:leading-[1.1] line-clamp-2 sm:line-clamp-none"
                        >
                          {banners[currentBanner].title}
                        </motion.h1>
@@ -109,7 +113,7 @@ const Home = () => {
                          transition={{ delay: 0.6 }}
                        >
                          <Link to={banners[currentBanner].link}>
-                           <Button size="lg" className="rounded-2xl px-12 text-lg shadow-2xl">Shop Now</Button>
+                           <Button size="sm" className="rounded-xl sm:rounded-2xl px-5 sm:px-12 sm:text-lg shadow-2xl mt-1 sm:mt-0">Shop Now</Button>
                          </Link>
                        </motion.div>
                     </div>
@@ -118,13 +122,17 @@ const Home = () => {
               )}
             </AnimatePresence>
             
-            {/* Banner dots */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+            {/* Banner dots — hair-thin on mobile */}
+            <div className="absolute bottom-2.5 sm:bottom-5 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5 z-10">
               {banners.map((_, idx) => (
-                <button 
-                  key={idx} 
+                <div
+                  key={idx}
                   onClick={() => setCurrentBanner(idx)}
-                  className={`w-3 h-3 rounded-full transition-all duration-500 ${currentBanner === idx ? 'bg-primary w-10 shadow-lg shadow-primary/50' : 'bg-white/40'}`} 
+                  className={`h-px sm:h-[3px] rounded-full cursor-pointer transition-all duration-500 ${
+                    currentBanner === idx
+                      ? 'bg-white w-5 sm:w-6'
+                      : 'bg-white/35 w-2.5 sm:w-3'
+                  }`}
                 />
               ))}
             </div>
@@ -133,14 +141,14 @@ const Home = () => {
       </section>
 
       {/* Categories */}
-      <section className="space-y-10 sm:space-y-12">
-        <div className="flex justify-between items-end">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight mb-3">Shop by Category</h2>
-            <p className="text-secondary text-base">Deliciously categorized for your convenience</p>
+      <section className="space-y-6 sm:space-y-10">
+        <div className="flex justify-between items-center gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-text tracking-tight mb-1 sm:mb-3">Shop by Category</h2>
+            <p className="text-secondary text-sm sm:text-base leading-snug">Deliciously categorized for your convenience</p>
           </div>
-          <Link to="/products" className="group text-primary font-extrabold flex items-center gap-2">
-            See All <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          <Link to="/products" className="group text-primary font-extrabold flex items-center gap-1 text-sm sm:text-base whitespace-nowrap shrink-0">
+            See All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -167,8 +175,8 @@ const Home = () => {
       </section>
 
       {/* Features */}
-      <section className="bg-white rounded-[60px] p-8 sm:p-20 shadow-sm border border-orange-50/50">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+      <section className="bg-white rounded-3xl sm:rounded-[50px] lg:rounded-[60px] p-6 sm:p-12 lg:p-20 shadow-sm border border-orange-50/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
           {features.map((feature, idx) => (
             <div key={idx} className="flex flex-col items-center text-center group">
               <div className="w-24 h-24 rounded-[32px] bg-primary/5 flex items-center justify-center mb-8 group-hover:bg-primary transition-all duration-500 group-hover:rotate-6">
@@ -263,7 +271,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-background rounded-[60px] p-8 sm:p-20 text-center relative overflow-hidden ring-1 ring-primary/10">
+      <section className="bg-background rounded-3xl sm:rounded-[50px] lg:rounded-[60px] p-6 sm:p-12 lg:p-20 text-center relative overflow-hidden ring-1 ring-primary/10">
          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -mr-48 -mt-48" />
          <div className="relative z-10">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-text mb-6">Need a Custom Creation?</h2>

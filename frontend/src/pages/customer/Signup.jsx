@@ -42,13 +42,13 @@ const Signup = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white rounded-[40px] p-10 shadow-2xl shadow-orange-500/5 border border-gray-50"
+        className="max-w-md w-full bg-white rounded-3xl sm:rounded-[40px] p-6 sm:p-10 shadow-2xl shadow-orange-500/5 border border-gray-50"
       >
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Cake size={32} />
           </div>
-          <h2 className="text-4xl font-black text-text mb-2">Join Us</h2>
+          <h2 className="text-2xl sm:text-4xl font-black text-text mb-2">Join Us</h2>
           <p className="text-secondary font-medium">Create an account to start your sweet journey!</p>
         </div>
 

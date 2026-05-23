@@ -212,7 +212,7 @@ const Orders = () => {
                 </div>
               </div>
               
-              <div className="bg-gray-50 px-8 py-4 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-secondary">
+              <div className="bg-gray-50 px-4 sm:px-6 py-2.5 flex flex-col xs:flex-row sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 text-[10px] font-extrabold uppercase tracking-wider text-secondary border-t border-gray-100/50">
                 <div className="flex items-center gap-2">
                    <div className={`w-2 h-2 rounded-full ${order.isPaid ? 'bg-green-500' : 'bg-orange-400'}`} />
                    <span>Payment Method: {order.paymentMethod} ({order.isPaid ? 'Paid' : 'Unpaid'})</span>
