@@ -91,14 +91,28 @@ select:focus {
   scrollbar-width: none;
 }
 
-/* Prevent horizontal overflow (page bounce on mobile) */
-html, body {
+/* ─── Global Font Scaling ────────────────────────────────────────────────────
+   Setting root font-size here scales ALL rem-based Tailwind utilities
+   proportionally — no need to touch individual components.
+   xs/mobile: 13px  →  sm: 14.5px  →  md+: 16px (browser default)
+   ─────────────────────────────────────────────────────────────────────────── */
+html {
+  font-size: 13px;          /* ~81% of default — tight & readable on phones  */
   overflow-x: hidden;
+}
+@media (min-width: 480px) {
+  html { font-size: 14px; } /* small tablet / large phone                     */
+}
+@media (min-width: 640px) {
+  html { font-size: 15px; } /* sm breakpoint — tablet                         */
+}
+@media (min-width: 1024px) {
+  html { font-size: 16px; } /* lg+ — full desktop default                     */
 }
 
 /* Touch-friendly tap target minimum size on mobile */
 @media (max-width: 640px) {
   button, a {
-    min-height: 36px;
+    min-height: 34px;
   }
 }
