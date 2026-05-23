@@ -10,7 +10,9 @@ import {
   Truck,
   Eye,
   User,
-  ShoppingBag
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import axios from 'axios';
 import { APP_CONFIG } from '../../config/constants';
@@ -24,6 +26,15 @@ const OrderManagement = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const { token } = useSelector((state) => state.auth);
+  
+  // Search and Pagination states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const fetchOrders = async () => {
     try {
@@ -67,8 +78,28 @@ const OrderManagement = () => {
     }
   };
 
+  // Filter orders by search query (Order ID, customer name, email)
+  const filteredOrders = (orders || []).filter((order) => {
+    const orderId = order._id || '';
+    const userName = order.user?.name || '';
+    const userEmail = order.user?.email || '';
+    const query = searchTerm.toLowerCase();
+    
+    return (
+      orderId.toLowerCase().includes(query) ||
+      userName.toLowerCase().includes(query) ||
+      userEmail.toLowerCase().includes(query)
+    );
+  });
+
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-2xl sm:text-4xl font-black text-text mb-2">Order Fulfillment</h1>
@@ -76,19 +107,21 @@ const OrderManagement = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl sm:rounded-[40px] shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-[40px] shadow-sm border border-gray-100 overflow-hidden lg:h-[calc(100vh-180px)] lg:flex lg:flex-col">
         <div className="p-8 border-b border-gray-50">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
               placeholder="Search by Order ID or Customer..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-2xl bg-background border-transparent focus:bg-white focus:border-primary/20 outline-none font-medium transition-all"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto -mx-1">
+        <div className="overflow-x-auto -mx-1 lg:flex-grow lg:overflow-y-auto">
           <table className="w-full text-left min-w-[640px]">
             <thead className="bg-gray-50/50 text-secondary text-xs font-black uppercase tracking-widest">
               <tr>
@@ -119,7 +152,7 @@ const OrderManagement = () => {
                   </tr>
                 ))
               ) : (
-                orders.map((order) => (
+                paginatedOrders.map((order) => (
                   <tr key={order._id} className="hover:bg-gray-50/30 transition-colors">
                     <td className="px-8 py-6">
                       <div>
@@ -163,7 +196,38 @@ const OrderManagement = () => {
           {orders.length === 0 && !loading && (
             <div className="py-20 text-center text-secondary font-medium">No orders found yet.</div>
           )}
+
+          {orders.length > 0 && filteredOrders.length === 0 && (
+            <div className="py-20 text-center text-secondary font-medium">No orders found matching your search.</div>
+          )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-6 sm:p-8 border-t border-gray-50 flex flex-row gap-4 items-center justify-between">
+            <span className="text-sm font-bold text-secondary">
+              Page {currentPage} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className="rounded-xl p-2.5 transition-all active:scale-95"
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <Button
+                variant="outline"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className="rounded-xl p-2.5 transition-all active:scale-95"
+              >
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* order detail modal */}

@@ -118,7 +118,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8">
         {loading ? (
           [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-44 rounded-[32px]" />)
         ) : (
@@ -128,14 +128,14 @@ const AdminDashboard = () => {
             { icon: <CakeIcon size={24} />, label: 'Products', value: stats?.productsCount, color: 'bg-accent/10 text-accent', trend: '+2 new' },
             { icon: <Users size={24} />, label: 'Active Users', value: '1,284', color: 'bg-blue-100 text-blue-600', trend: '+8.1%' },
           ].map((item, i) => (
-            <div key={i} className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-[32px] shadow-sm border border-gray-50 flex flex-col items-start gap-4 hover:shadow-md transition-all">
+            <div key={i} className="bg-white p-6 xl:p-8 rounded-2xl xl:rounded-[32px] shadow-sm border border-gray-50 flex flex-col items-start gap-4 hover:shadow-md transition-all">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${item.color}`}>
                 {item.icon}
               </div>
               <div>
                 <p className="text-secondary text-sm font-black uppercase tracking-widest mb-1">{item.label}</p>
                 <div className="flex items-baseline gap-3">
-                  <h3 className="text-3xl font-black text-text">{item.value}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-text">{item.value}</h3>
                   <span className="text-[10px] font-black bg-green-50 text-green-500 px-2 py-0.5 rounded-full">{item.trend}</span>
                 </div>
               </div>
@@ -144,9 +144,9 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:gap-12">
         {/* revenue graph */}
-        <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-[40px] p-6 sm:p-10 shadow-sm border border-gray-50">
+        <div className="xl:col-span-2 bg-white rounded-2xl sm:rounded-[40px] p-6 sm:p-10 shadow-sm border border-gray-50">
           <div className="flex justify-between items-center mb-10">
             <h3 className="text-2xl font-black text-text flex items-center gap-3">
               <TrendingUp className="text-primary" /> Revenue Analytics

@@ -8,7 +8,9 @@ import {
   X,
   Upload,
   ImagePlus,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { getProducts } from '../../store/slices/productSlice';
 import { getCategories } from '../../store/slices/categorySlice';
@@ -42,6 +44,16 @@ const ProductManagement = () => {
 
   // For preview of selected local files before upload
   const [previewFiles, setPreviewFiles] = useState([]);
+  
+  // Search and Category filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
 
   useEffect(() => {
     dispatch(getProducts('limit=100'));
@@ -198,8 +210,27 @@ const ProductManagement = () => {
     }
   };
 
+  // Filter products by search term and category selection
+  const filteredProducts = (products || []).filter((product) => {
+    const matchesSearch = 
+      product.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesCategory = 
+      selectedCategory === 'All Categories' || 
+      product.category?.toLowerCase() === selectedCategory.toLowerCase();
+      
+    return matchesSearch && matchesCategory;
+  });
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-2xl sm:text-4xl font-black text-text mb-1">Bakery Inventory</h1>
@@ -210,27 +241,33 @@ const ProductManagement = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden lg:h-[calc(100vh-180px)] lg:flex lg:flex-col">
         <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row gap-6 justify-between items-center">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Filter products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-2xl bg-background border-2 border-transparent outline-none font-medium transition-all"
             />
           </div>
           <div className="flex gap-4">
-            <select className="bg-background px-4 py-3 rounded-2xl font-bold outline-none border-2 border-transparent cursor-pointer">
-              <option>All Categories</option>
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-background px-4 py-3 rounded-2xl font-bold outline-none border-2 border-transparent cursor-pointer"
+            >
+              <option value="All Categories">All Categories</option>
               {dbCategories.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
             </select>
           </div>
         </div>
 
-        <div className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
+        <div className="overflow-x-auto -mx-1 lg:flex-grow lg:overflow-y-auto">
           {/* Desktop Table */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden md:block">
             <table className="w-full text-left">
               <thead className="bg-gray-50/50 text-secondary text-xs font-black uppercase tracking-widest border-b border-gray-100">
                 <tr>
@@ -242,7 +279,7 @@ const ProductManagement = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {products.map((product) => (
+                {paginatedProducts.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-50/30 transition-colors">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
@@ -299,13 +336,19 @@ const ProductManagement = () => {
                     </td>
                   </tr>
                 ))}
+                {filteredProducts.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="text-center py-20 text-secondary font-medium">
+                      No products found matching your filters.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
 
-          {/* Mobile Cards */}
           <div className="md:hidden divide-y divide-gray-100">
-            {products.map((product) => (
+            {paginatedProducts.map((product) => (
               <div key={product._id} className="p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -374,7 +417,38 @@ const ProductManagement = () => {
           {products.length === 0 && !isLoading && (
             <div className="py-20 text-center text-secondary font-medium">No products found. Start adding some!</div>
           )}
+
+          {products.length > 0 && filteredProducts.length === 0 && (
+            <div className="py-20 text-center text-secondary font-medium">No products found matching your filters.</div>
+          )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-6 sm:p-8 border-t border-gray-50 flex flex-row gap-4 items-center justify-between">
+            <span className="text-sm font-bold text-secondary">
+              Page {currentPage} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className="rounded-xl p-2.5 transition-all active:scale-95"
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <Button
+                variant="outline"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className="rounded-xl p-2.5 transition-all active:scale-95"
+              >
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* product modal */}
