@@ -1,8 +1,20 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import AdminLayout from './components/layout/AdminLayout';
+
+// Component to automatically scroll to top on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 // Customer Pages
 import Home from './pages/customer/Home';
@@ -52,6 +64,7 @@ const AdminContainer = () => (
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Admin Routes */}
         <Route element={<AdminContainer />}>

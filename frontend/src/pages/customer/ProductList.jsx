@@ -242,7 +242,9 @@ const ProductList = () => {
                       <Link to={`/products/${product._id}`} className="hover:text-primary transition-colors">
                         <h3 className="text-2xl font-extrabold mb-3 line-clamp-1">{product.name}</h3>
                       </Link>
-                      <p className="text-secondary text-base mb-6 line-clamp-2 flex-grow">{product.description}</p>
+                      <div className="flex-grow">
+                        <p className="text-secondary text-base mb-6 line-clamp-2">{product.description}</p>
+                      </div>
                       <div className="flex justify-between items-center pt-6 border-t border-gray-50">
                         <span className="text-3xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
                         <Link to={`/products/${product._id}`}>

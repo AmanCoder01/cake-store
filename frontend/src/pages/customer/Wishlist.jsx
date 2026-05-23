@@ -85,7 +85,8 @@ const Wishlist = () => {
           <AnimatePresence>
             {safeItems.map((item, index) => {
               const product = item?.product;
-              if (!product) return null;
+              // Skip rendering if product is not populated (i.e. is just a string ID or has no images) to prevent TypeError crashes
+              if (!product || typeof product === 'string' || !product.images) return null;
               return (
                 <motion.div
                   key={product?._id || index}

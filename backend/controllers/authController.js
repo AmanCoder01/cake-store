@@ -2,8 +2,10 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+  const secret = process.env.JWT_SECRET || 'super-secret-cake-store-key-123456';
+  const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
+  return jwt.sign({ id }, secret, {
+    expiresIn: expiresIn
   });
 };
 

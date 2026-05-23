@@ -59,9 +59,9 @@ const Home = () => {
   };
 
   const features = [
-    { icon: <Truck className="text-primary" />, title: 'Fast Delivery', desc: 'Freshly baked cakes delivered within 24 hours to your doorstep.' },
-    { icon: <ShieldCheck className="text-primary" />, title: 'Quality Assured', desc: 'We use premium ingredients and maintain strict hygiene standards.' },
-    { icon: <Clock className="text-primary" />, title: 'All Occasions', desc: 'Pre-order for any upcoming event or get instant delivery for selected items.' },
+    { icon: Truck, title: 'Fast Delivery', desc: 'Freshly baked cakes delivered within 24 hours to your doorstep.' },
+    { icon: ShieldCheck, title: 'Quality Assured', desc: 'We use premium ingredients and maintain strict hygiene standards.' },
+    { icon: Clock, title: 'All Occasions', desc: 'Pre-order for any upcoming event or get instant delivery for selected items.' },
   ];
 
   return (
@@ -171,10 +171,11 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
           {features.map((feature, idx) => (
             <div key={idx} className="flex flex-col items-center text-center group">
-              <div className="w-24 h-24 rounded-[32px] bg-primary/5 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500 group-hover:rotate-6">
-                <div className="text-primary group-hover:text-white transition-colors">
-                    {feature.icon}
-                </div>
+              <div className="w-24 h-24 rounded-[32px] bg-primary/5 flex items-center justify-center mb-8 group-hover:bg-primary transition-all duration-500 group-hover:rotate-6">
+                {(() => {
+                  const Icon = feature.icon;
+                  return <Icon size={32} className="text-primary group-hover:text-white transition-colors duration-500" />;
+                })()}
               </div>
               <h3 className="text-2xl font-extrabold mb-4">{feature.title}</h3>
               <p className="text-secondary leading-relaxed text-lg">{feature.desc}</p>
@@ -235,7 +236,9 @@ const Home = () => {
                   <Link to={`/products/${product._id}`} className="hover:text-primary transition-colors">
                     <h3 className="text-2xl font-extrabold mb-3 line-clamp-1">{product.name}</h3>
                   </Link>
-                  <p className="text-secondary text-base mb-6 line-clamp-2 flex-grow">{product.description}</p>
+                  <div className="flex-grow">
+                    <p className="text-secondary text-base mb-6 line-clamp-2">{product.description}</p>
+                  </div>
                   <div className="flex justify-between items-center pt-6 border-t border-gray-50">
                     <span className="text-3xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
                     <Link to={`/products/${product._id}`}>

@@ -22,6 +22,10 @@ export const toggleWishlist = createAsyncThunk('wishlist/toggle', async (product
     const response = await axios.post(`${API_URL}/${productId}`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    
+    // Automatically refetch the populated wishlist items to keep frontend in sync
+    thunkAPI.dispatch(getWishlist());
+    
     return { productId, ...response.data };
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);

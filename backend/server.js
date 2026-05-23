@@ -1,3 +1,6 @@
+// Force Node.js to use public DNS resolvers (Google & Cloudflare) to prevent ECONNREFUSED DNS lookup issues on some networks
+require('node:dns/promises').setServers(['8.8.8.8', '1.1.1.1']);
+
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -9,7 +12,7 @@ const morgan = require('morgan');
 const path = require('path');
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
