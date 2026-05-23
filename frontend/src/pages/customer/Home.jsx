@@ -271,13 +271,13 @@ const Home = () => {
                 Whether it's a dream wedding cake or a personalized birthday surprise, our master bakers are ready to bring your vision to life.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-                <Link to="/products?category=Custom">
-                    <Button size="lg" className="rounded-2xl px-12 shadow-xl shadow-primary/20 h-16 text-lg">
+                <Link to="/products?category=Custom Creations">
+                    <Button size="lg" className="rounded-2xl px-12 shadow-xl shadow-primary/20 h-14 text-base">
                         Request Custom Cake
                     </Button>
                 </Link>
                 <Link to="/products">
-                    <Button variant="outline" size="lg" className="rounded-2xl px-12 h-16 text-lg">
+                    <Button variant="outline" size="lg" className="rounded-2xl px-12 h-14 text-base">
                         Browse Gallery
                     </Button>
                 </Link>

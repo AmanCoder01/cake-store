@@ -66,6 +66,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const bannerRoutes = require('./routes/bannerRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 const errorMiddleware = require('./middleware/errorMiddleware');
 
@@ -77,6 +78,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Catch-all route for undefined routes
 app.use((req, res, next) => {

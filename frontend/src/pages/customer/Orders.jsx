@@ -1,18 +1,62 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Package, Truck, CheckCircle2, ShoppingBag, Clock, ChevronRight } from 'lucide-react';
+import { Package, Truck, CheckCircle2, ShoppingBag, Clock, ChevronRight, Star, X } from 'lucide-react';
 import axios from 'axios';
 import { APP_CONFIG } from '../../config/constants';
 import toast from 'react-hot-toast';
 import Skeleton from '../../components/ui/Skeleton';
 import Button from '../../components/ui/Button';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { token } = useSelector((state) => state.auth);
+
+  // Review modal states
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewProductId, setReviewProductId] = useState('');
+  const [reviewProductName, setReviewProductName] = useState('');
+  const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const handleOpenReviewModal = (productId, productName) => {
+    setReviewProductId(productId);
+    setReviewProductName(productName);
+    setRating(5);
+    setReviewText('');
+    setIsReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewText.trim()) {
+      toast.error('Please write some comments for your review.');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      await axios.post(`${APP_CONFIG.API_BASE_URL}/reviews/${reviewProductId}`, {
+        rating,
+        review: reviewText
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Thank you! Your review has been submitted.');
+      handleCloseReviewModal();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -120,10 +164,18 @@ const Orders = () => {
                       {order.orderItems.map((item, i) => (
                         <div key={i} className="flex items-center gap-4 bg-background p-3 rounded-2xl border border-gray-100 hover:border-primary/20 transition-all">
                           <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover" />
-                          <div>
+                          <div className="flex-grow">
                             <p className="font-bold text-sm text-text line-clamp-1">{item.name}</p>
                             <p className="text-xs text-secondary font-bold">{item.quantity} x ₹{item.price}</p>
                           </div>
+                          {order.status === 'Delivered' && (
+                            <button
+                              onClick={() => handleOpenReviewModal(item.product, item.name)}
+                              className="ml-2 px-3 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-extrabold transition-all duration-300 shadow-sm"
+                            >
+                              Review
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -157,6 +209,110 @@ const Orders = () => {
           ))}
         </div>
       )}
+
+      {/* Review Modal */}
+      <AnimatePresence>
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseReviewModal}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 z-10 overflow-hidden"
+            >
+              {/* Decorative Accent */}
+              <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-primary to-orange-400" />
+
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-xl font-extrabold text-text">Write a Review</h3>
+                  <p className="text-sm text-secondary font-medium mt-1">For: <span className="text-primary font-bold">{reviewProductName}</span></p>
+                </div>
+                <button
+                  onClick={handleCloseReviewModal}
+                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors text-secondary"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitReview} className="space-y-6">
+                {/* Rating selection */}
+                <div className="flex flex-col items-center py-4 bg-background rounded-2xl border border-gray-50">
+                  <span className="text-xs font-extrabold uppercase tracking-widest text-secondary mb-3">Your Rating</span>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="p-1 transition-transform active:scale-90"
+                      >
+                        <Star
+                          size={32}
+                          className="transition-colors duration-200"
+                          fill={star <= (hoverRating || rating) ? '#FDE047' : 'none'}
+                          stroke={star <= (hoverRating || rating) ? '#FDE047' : '#D1D5DB'}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-sm font-bold text-text mt-2">
+                    {rating === 5 && '😍 Outstanding masterpiece!'}
+                    {rating === 4 && '😊 Delighted and delicious!'}
+                    {rating === 3 && '😐 Average sweet treat.'}
+                    {rating === 2 && '😟 Not what I expected.'}
+                    {rating === 1 && '🤢 Very disappointing.'}
+                  </span>
+                </div>
+
+                {/* Review Text */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-extrabold uppercase tracking-widest text-secondary">Your Feedback</label>
+                  <textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Share your thoughts about the flavor, texture, design and delivery..."
+                    rows={4}
+                    className="w-full p-4 rounded-2xl border border-gray-100 bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <Button
+                    type="submit"
+                    disabled={submittingReview}
+                    className="flex-grow h-12 rounded-2xl"
+                  >
+                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCloseReviewModal}
+                    className="px-6 rounded-2xl h-12"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
