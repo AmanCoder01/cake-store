@@ -218,7 +218,7 @@ const Checkout = () => {
                         <MapPin size={28} />
                       </div>
                       <div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-text">Delivery Address</h2>
+                        <h2 className="text-xl sm:text-2xl font-extrabold text-text">Delivery Address</h2>
                         <p className="text-secondary text-sm font-medium">Select a saved address or add a new one</p>
                       </div>
                     </div>
@@ -346,14 +346,14 @@ const Checkout = () => {
                 className="space-y-8"
               >
                 <div className="bg-white rounded-2xl sm:rounded-[40px] p-6 sm:p-10 shadow-sm border border-gray-50">
-                  <h2 className="text-2xl sm:text-3xl font-black text-text mb-6 sm:mb-8">Payment Method</h2>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-text mb-6 sm:mb-8">Payment Method</h2>
                   <div className="p-6 rounded-3xl border-4 border-primary bg-primary/5 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center">
                         <ShoppingBag size={24} />
                       </div>
                       <div>
-                        <p className="text-xl font-black text-text">Cash on Delivery</p>
+                        <p className="text-lg font-bold text-text">Cash on Delivery</p>
                         <p className="text-secondary font-medium">Pay when your cake arrives</p>
                       </div>
                     </div>
@@ -382,7 +382,7 @@ const Checkout = () => {
                       onClick={handlePlaceOrder}
                       disabled={isOrdering}
                       size="lg"
-                      className="w-full h-16 rounded-2xl shadow-xl shadow-primary/20"
+                      className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20"
                     >
                       {isOrdering ? 'Placing Order...' : 'Place My Order'}
                     </Button>
@@ -397,7 +397,7 @@ const Checkout = () => {
         {step < 3 && (
           <div className="lg:col-span-1">
             <Card className="p-8 sticky top-28 bg-white border border-gray-50 shadow-sm">
-              <h3 className="text-2xl font-black text-text mb-8">Your Items</h3>
+              <h3 className="text-xl font-extrabold text-text mb-8">Your Items</h3>
               <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
                 {cartItems.map((item) => (
                   <div key={item.product} className="flex gap-4">
@@ -424,8 +424,8 @@ const Checkout = () => {
                   <span className="text-text">₹{tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                  <span className="font-black text-text">Total</span>
-                  <span className="text-2xl font-black text-primary">₹{total.toFixed(2)}</span>
+                  <span className="font-bold text-text">Total</span>
+                  <span className="text-xl font-extrabold text-primary">₹{total.toFixed(2)}</span>
                 </div>
               </div>
             </Card>

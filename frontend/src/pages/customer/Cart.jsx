@@ -44,7 +44,7 @@ const Cart = () => {
         <Link to="/products" className="p-2 hover:bg-white rounded-full transition-colors text-secondary hover:text-primary">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="text-2xl sm:text-4xl font-black text-text">Your Sweet Box</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-text">Your Sweet Box</h1>
         <span className="text-lg font-bold text-primary bg-primary/10 px-4 py-1 rounded-full">{cartItems.length} Items</span>
       </div>
 
@@ -106,7 +106,7 @@ const Cart = () => {
         {/* order summary */}
         <div className="lg:col-span-1">
           <Card className="p-8 sticky top-28 bg-white border border-gray-50 shadow-xl shadow-orange-500/5">
-            <h3 className="text-2xl font-black text-text mb-8">Summary</h3>
+            <h3 className="text-xl font-extrabold text-text mb-8">Summary</h3>
             
             <div className="space-y-6 mb-8">
               <div className="flex justify-between text-secondary font-bold">
@@ -122,14 +122,14 @@ const Cart = () => {
                 <span className="text-text">₹{tax.toFixed(2)}</span>
               </div>
               <div className="pt-6 border-t border-gray-100 flex justify-between items-center">
-                <span className="text-xl font-black text-text">Total</span>
-                <span className="text-3xl font-black text-primary">₹{total.toFixed(2)}</span>
+                <span className="text-lg font-bold text-text">Total</span>
+                <span className="text-2xl font-extrabold text-primary">₹{total.toFixed(2)}</span>
               </div>
             </div>
 
             <Button 
               size="lg" 
-              className="w-full h-16 text-lg rounded-2xl shadow-xl shadow-primary/20 group"
+              className="w-full h-14 text-base rounded-2xl shadow-xl shadow-primary/20 group"
               onClick={() => navigate('/checkout')}
             >
               Checkout <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
