@@ -11,6 +11,9 @@ exports.getAddresses = async (req, res) => {
 
 exports.createAddress = async (req, res) => {
   try {
+    if (req.body.isDefault === true) {
+      await Address.updateMany({ user: req.user._id }, { isDefault: false });
+    }
     const address = await Address.create({
       ...req.body,
       user: req.user._id
@@ -23,6 +26,9 @@ exports.createAddress = async (req, res) => {
 
 exports.updateAddress = async (req, res) => {
   try {
+    if (req.body.isDefault === true) {
+      await Address.updateMany({ user: req.user._id }, { isDefault: false });
+    }
     const address = await Address.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       req.body,

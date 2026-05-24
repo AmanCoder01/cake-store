@@ -32,6 +32,7 @@ import AboutUs from './pages/customer/AboutUs';
 import BakingProcess from './pages/customer/BakingProcess';
 import PrivacyPolicy from './pages/customer/PrivacyPolicy';
 import Terms from './pages/customer/Terms';
+import ManageAddresses from './pages/customer/ManageAddresses';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -98,6 +99,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/addresses" element={<ProtectedRoute><ManageAddresses /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           <Route path="/about" element={<AboutUs />} />

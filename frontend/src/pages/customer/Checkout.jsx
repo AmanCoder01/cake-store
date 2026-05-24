@@ -53,6 +53,7 @@ const Checkout = () => {
   const [formDistance, setFormDistance] = useState(1.5);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
+  const [hasGeolocated, setHasGeolocated] = useState(false);
 
   // Automatically calculate real geodesic distance when user is typing street or city
   useEffect(() => {
@@ -124,6 +125,7 @@ const Checkout = () => {
             setFormCity(city);
             setFormPostalCode(postal);
             setFormCountry(country);
+            setHasGeolocated(true);
 
             toast.success('Location autofilled successfully! 📍', { id: 'geo-toast' });
           } else {
@@ -135,6 +137,7 @@ const Checkout = () => {
           setFormCity('Varanasi');
           setFormPostalCode('221005');
           setFormCountry('India');
+          setHasGeolocated(true);
           toast.success('Autofilled with Varanasi Outlet defaults! 📍', { id: 'geo-toast' });
         } finally {
           setDetectingLocation(false);
@@ -240,6 +243,7 @@ const Checkout = () => {
       setFormCountry('');
       setFormPhone('');
       setFormDistance(1.5);
+      setHasGeolocated(false);
       toast.success('Address saved!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save address');
@@ -385,7 +389,9 @@ const Checkout = () => {
                     <div className="text-center py-12 text-secondary font-medium">Loading addresses...</div>
                   ) : savedAddresses.length > 0 && !showAddForm ? (
                     <div className="space-y-4">
-                      {savedAddresses.map((addr) => (
+                      {(savedAddresses.find(a => a._id === selectedAddressId)
+                        ? [savedAddresses.find(a => a._id === selectedAddressId)]
+                        : [savedAddresses[0]]).map((addr) => (
                         <div
                           key={addr._id}
                           onClick={() => setSelectedAddressId(addr._id)}
@@ -428,6 +434,24 @@ const Checkout = () => {
                           </div>
                         </div>
                       ))}
+
+                      {/* Manage Addresses Redirection Link */}
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-gray-50 border border-gray-100 rounded-[24px] mt-6">
+                        <div className="text-center sm:text-left">
+                          <p className="font-extrabold text-sm text-text">Want to manage all address options?</p>
+                          <p className="text-secondary text-xs font-semibold mt-0.5">
+                            {savedAddresses.length > 1 
+                              ? `Showing 1 of your ${savedAddresses.length} saved locations.` 
+                              : "Add, delete, or set default delivery addresses easily."}
+                          </p>
+                        </div>
+                        <Link 
+                          to="/addresses"
+                          className="px-5 py-2.5 bg-white border border-gray-200 hover:border-primary/30 text-secondary hover:text-primary font-bold text-xs rounded-xl shadow-sm hover:shadow transition-all text-center shrink-0"
+                        >
+                          Manage Locations
+                        </Link>
+                      </div>
                     </div>
                   ) : !showAddForm ? (
                     <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-3xl">
@@ -463,22 +487,46 @@ const Checkout = () => {
                               {detectingLocation ? '📍 Detecting location...' : '📍 Use Current Location'}
                             </Button>
                           </div>
-                          <div className="md:col-span-2">
-                            <Input label="Street Address" value={formAddress} onChange={(e) => setFormAddress(e.target.value)} required placeholder="123 Sweet Street, Sector 14" />
-                          </div>
-                          <Input label="City" value={formCity} onChange={(e) => setFormCity(e.target.value)} required placeholder="Mumbai" />
-                          <Input label="Postal Code" value={formPostalCode} onChange={(e) => setFormPostalCode(e.target.value)} required placeholder="400001" />
-                          <Input label="Country" value={formCountry} onChange={(e) => setFormCountry(e.target.value)} required placeholder="India" />
-                          <Input label="Phone Number" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} required placeholder="+91 98765 43210" />
+                                      {/* Simulated Geolocation Status Banner inside checkout form */}
+                           {!hasGeolocated && (
+                             <div className="md:col-span-2 p-4 bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-extrabold mb-4 animate-pulse">
+                               <span>⚠️ Please click "Use Current Location" first to set your coordinates and shipping distance accurately.</span>
+                             </div>
+                           )}
+                           {hasGeolocated && (
+                             <div className="md:col-span-2 p-4 bg-primary/5 border border-primary/10 text-primary rounded-2xl flex items-center justify-between text-xs font-black mb-4">
+                               <span className="flex items-center gap-2">📍 Distance calculated to outlet:</span>
+                               <span className="bg-primary text-white px-2.5 py-0.5 rounded-full">{formDistance} KM</span>
+                             </div>
+                           )}
 
-                          <div className="md:col-span-2 mt-6 flex gap-4">
-                            <Button type="submit" disabled={savingAddress} className="flex-grow h-12 rounded-2xl">
-                              {savingAddress ? 'Saving...' : 'Save Address'}
-                            </Button>
-                            <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="px-8 rounded-2xl">
-                              Cancel
-                            </Button>
-                          </div>
+                           <div className="md:col-span-2">
+                             <Input 
+                               label="Street Address / Area (Refine your street, house, landmark)" 
+                               value={formAddress} 
+                               onChange={(e) => setFormAddress(e.target.value)} 
+                               required 
+                               disabled={!hasGeolocated}
+                               placeholder={hasGeolocated ? "e.g. Flat 301, Vaishno Vihar" : "⚠️ Click 'Use Current Location' first"} 
+                             />
+                           </div>
+                           <Input label="City" value={formCity} disabled={!hasGeolocated} readOnly={hasGeolocated} required placeholder="City" />
+                           <Input label="Postal Code" value={formPostalCode} disabled={!hasGeolocated} readOnly={hasGeolocated} required placeholder="Postal Code" />
+                           <Input label="Country" value={formCountry} disabled required placeholder="India" />
+                           <Input label="Phone Number" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} required placeholder="+91 98765 43210" />
+ 
+                           <div className="md:col-span-2 mt-6 flex gap-4">
+                             <Button 
+                               type="submit" 
+                               disabled={savingAddress || !hasGeolocated} 
+                               className="flex-grow h-12 rounded-2xl font-black"
+                             >
+                               {savingAddress ? 'Saving...' : !hasGeolocated ? 'Lock Location to Save Address' : 'Save Address'}
+                             </Button>
+                             <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="px-8 rounded-2xl">
+                               Cancel
+                             </Button>
+                           </div>
                         </div>
                       </motion.form>
                     )}
