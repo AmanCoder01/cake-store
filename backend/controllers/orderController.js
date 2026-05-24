@@ -34,7 +34,7 @@ exports.createOrder = async (req, res) => {
           recipient: admin._id,
           type: 'NEW_ORDER',
           title: 'New Order Placed! 🎂',
-          message: `Order #${order._id.toString().substring(18)} for $${order.totalPrice} has been placed.`,
+          message: `Order #${order._id.toString().substring(18)} for ₹${order.totalPrice} has been placed.`,
           orderId: order._id
         }))
       );

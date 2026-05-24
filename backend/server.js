@@ -135,8 +135,23 @@ app.use(errorMiddleware);
 
 const DB = process.env.MONGODB_URI || 'mongodb://localhost:27017/cake-store';
 console.log(DB);
-mongoose.connect(DB).then(() => {
+mongoose.connect(DB).then(async () => {
   console.log('DB connection successful!');
+  
+  // Safe self-healing migration to convert existing dollar symbol ($) notifications to INR (₹)
+  try {
+    const Notification = require('./models/notificationModel');
+    const notificationsToUpdate = await Notification.find({ message: { $regex: /\$/ } });
+    if (notificationsToUpdate.length > 0) {
+      for (const notif of notificationsToUpdate) {
+        notif.message = notif.message.replace('$', '₹');
+        await notif.save();
+      }
+      console.log(`Successfully migrated ${notificationsToUpdate.length} notifications from $ to ₹.`);
+    }
+  } catch (err) {
+    console.error('Failed to run notifications migration:', err);
+  }
 }).catch(err => {
   console.log(DB);
   console.error('DB connection error:', err);

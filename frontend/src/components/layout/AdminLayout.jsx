@@ -63,7 +63,7 @@ const AdminLayout = ({ children }) => {
           </button>
         </header>
 
-        <main className="flex-grow p-5 sm:p-8 lg:p-12">
+        <main className="flex-grow p-4 sm:py-6 sm:px-6 lg:py-6 lg:px-10">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

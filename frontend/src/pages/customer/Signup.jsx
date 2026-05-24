@@ -53,47 +53,38 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <User className="absolute left-4 top-11 text-gray-400 z-10" size={18} />
-            <Input
-              label="Full Name"
-              type="text"
-              name="name"
-              placeholder="John Doe"
-              className="pl-12"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <Input
+            label="Full Name"
+            type="text"
+            name="name"
+            placeholder="John Doe"
+            leftIcon={<User size={18} />}
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
 
-          <div className="relative">
-            <Mail className="absolute left-4 top-11 text-gray-400 z-10" size={18} />
-            <Input
-              label="Email Address"
-              type="email"
-              name="email"
-              placeholder="name@example.com"
-              className="pl-12"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <Input
+            label="Email Address"
+            type="email"
+            name="email"
+            placeholder="name@example.com"
+            leftIcon={<Mail size={18} />}
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
 
-          <div className="relative">
-            <Lock className="absolute left-4 top-11 text-gray-400 z-10" size={18} />
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              className="pl-12"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            leftIcon={<Lock size={18} />}
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
 
           <div className="text-sm text-secondary font-medium px-2">
             By signing up, you agree to our <a href="#" className="text-primary font-bold">Terms</a> and <a href="#" className="text-primary font-bold">Privacy Policy</a>.
