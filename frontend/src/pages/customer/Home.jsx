@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Heart, Clock, Truck, ShieldCheck, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
@@ -20,6 +20,9 @@ const Home = () => {
   const { items: banners } = useSelector((state) => state.banner);
   const { items: categories } = useSelector((state) => state.category);
   const { user } = useSelector((state) => state.auth);
+  const { settings } = useSelector((state) => state.settings);
+
+  const isOutletClosed = settings?.isOutletOpen === false;
 
   const [currentBanner, setCurrentBanner] = useState(0);
 
@@ -65,8 +68,36 @@ const Home = () => {
   ];
 
   return (
-    <div className="space-y-24 pb-20">
+    <div className="space-y-16 pb-20">
       <Meta title="Home" description="Freshly baked happiness delivered to your door." />
+
+      {isOutletClosed && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 border-2 border-red-500/20 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 shadow-xl relative overflow-hidden"
+        >
+          {/* Subtle light pulse background */}
+          <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none" />
+          
+          <div className="flex items-center gap-3 sm:gap-6 relative z-10 text-center md:text-left flex-col md:flex-row">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/30 animate-bounce shrink-0">
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base sm:text-2xl font-black text-text mb-0.5 sm:mb-1">Outlet Currently Closed 🎂</h3>
+              <p className="text-secondary font-medium text-xs sm:text-base leading-relaxed">
+                Currently not taking any orders due to: <strong className="text-primary font-black">{settings?.closeReason || 'baking and maintenance'}</strong>. You are welcome to browse our menu!
+              </p>
+            </div>
+          </div>
+          <div className="relative z-10 shrink-0">
+            <span className="bg-red-500 text-white text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-md shadow-red-500/20">
+              Closed
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Hero Banners */}
       <section className="relative h-[300px] sm:h-[520px] lg:h-[650px] overflow-hidden rounded-2xl sm:rounded-[50px] lg:rounded-[60px] shadow-2xl">

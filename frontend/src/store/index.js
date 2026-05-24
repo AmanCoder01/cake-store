@@ -6,6 +6,7 @@ import wishlistReducer from './slices/wishlistSlice';
 import bannerReducer from './slices/bannerSlice';
 import categoryReducer from './slices/categorySlice';
 import reviewReducer from './slices/reviewSlice';
+import settingsReducer from './slices/settingsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     banner: bannerReducer,
     category: categoryReducer,
     reviews: reviewReducer,
+    settings: settingsReducer,
   },
 });

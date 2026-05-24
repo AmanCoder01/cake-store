@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { getSettings, updateSetting } from '../../store/slices/settingsSlice';
 import { 
   TrendingUp, 
   ShoppingBag, 
@@ -42,14 +43,28 @@ ChartJS.register(
   Filler
 );
 
+const REASON_OPTIONS = [
+  { value: 'baking and maintenance', label: 'Baking & Maintenance 🎂' },
+  { value: 'heavy rain or inclement weather', label: 'Heavy Rain / Inclement Weather 🌧️' },
+  { value: 'a private catering event', label: 'Private Catering Event 🎩' },
+  { value: 'a public holiday', label: 'Public Holiday 🎈' },
+  { value: 'outlet being out of ingredients / stock', label: 'Out of Ingredients / Stock 📦' },
+  { value: 'custom', label: 'Custom Reason... ✏️' }
+];
+
 const AdminDashboard = () => {
+  const dispatch = useDispatch();
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { token } = useSelector((state) => state.auth);
+  const { settings, isLoading: settingsLoading } = useSelector((state) => state.settings);
   const [timeFrame, setTimeFrame] = useState('Last 7 Days');
+  const [selectedReasonOption, setSelectedReasonOption] = useState('baking and maintenance');
+  const [customReasonText, setCustomReasonText] = useState('');
 
   useEffect(() => {
+    dispatch(getSettings());
     const fetchAdminData = async () => {
       try {
         const statsRes = await axios.get(`${APP_CONFIG.API_BASE_URL}/orders/stats`, {
@@ -69,7 +84,51 @@ const AdminDashboard = () => {
     };
 
     fetchAdminData();
-  }, [token]);
+  }, [token, dispatch]);
+
+  useEffect(() => {
+    if (settings?.closeReason) {
+      const match = REASON_OPTIONS.find(opt => opt.value === settings.closeReason);
+      if (match) {
+        setSelectedReasonOption(settings.closeReason);
+        setCustomReasonText('');
+      } else {
+        setSelectedReasonOption('custom');
+        setCustomReasonText(settings.closeReason);
+      }
+    }
+  }, [settings?.closeReason]);
+
+  const handleToggleOutlet = () => {
+    const nextStatus = !settings?.isOutletOpen;
+    const finalReason = selectedReasonOption === 'custom' ? customReasonText : selectedReasonOption;
+
+    if (nextStatus) {
+      // Opening the outlet
+      dispatch(updateSetting({ key: 'isOutletOpen', value: true })).then((action) => {
+        if (action.meta.requestStatus === 'fulfilled') {
+          toast.success('Outlet is now OPEN 🟢');
+        } else {
+          toast.error('Failed to open outlet');
+        }
+      });
+    } else {
+      // Closing the outlet: first save the closing reason, then toggle outlet status to closed
+      dispatch(updateSetting({ key: 'closeReason', value: finalReason || 'baking and maintenance' })).then((reasonAction) => {
+        if (reasonAction.meta.requestStatus === 'fulfilled') {
+          dispatch(updateSetting({ key: 'isOutletOpen', value: false })).then((statusAction) => {
+            if (statusAction.meta.requestStatus === 'fulfilled') {
+              toast.success('Outlet is now CLOSED 🛑');
+            } else {
+              toast.error('Failed to close outlet');
+            }
+          });
+        } else {
+          toast.error('Failed to close outlet');
+        }
+      });
+    }
+  };
 
   const getChartData = () => {
     if (!stats?.revenueStats) return { labels: [], data: [], numDays: 7 };
@@ -152,6 +211,102 @@ const AdminDashboard = () => {
           </Link>
         </div>
       </div>
+      {/* Outlet Store Status Control Card */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-gray-100 flex flex-col gap-4 sm:gap-6 hover:shadow-md transition-all">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-5 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-5 text-center sm:text-left flex-col sm:flex-row flex-1">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg transition-all shrink-0 ${
+              settings?.isOutletOpen 
+                ? 'bg-green-100 text-green-600 shadow-green-200' 
+                : 'bg-red-100 text-red-600 shadow-red-200'
+            }`}>
+              <Clock className={`w-6 h-6 sm:w-[30px] sm:h-[30px] ${settings?.isOutletOpen ? 'animate-pulse' : ''}`} />
+            </div>
+            <div>
+              <div className="flex items-center justify-center sm:justify-start gap-2.5 mb-0.5 sm:mb-1">
+                <h2 className="text-base sm:text-2xl font-black text-text">Outlet Status</h2>
+                <span className={`h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 rounded-full relative flex ${settings?.isOutletOpen ? 'bg-green-500' : 'bg-red-500'}`}>
+                  {settings?.isOutletOpen && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                  )}
+                </span>
+              </div>
+              <p className="text-secondary font-medium text-xs sm:text-base leading-relaxed">
+                {settings?.isOutletOpen 
+                  ? 'Your outlet is currently OPEN. Customers can place orders normally.' 
+                  : `Your outlet is currently CLOSED due to: "${settings?.closeReason || 'baking and maintenance'}".`
+                }
+              </p>
+            </div>
+          </div>
+ 
+          <div className="shrink-0 w-full lg:w-auto">
+            <button
+              onClick={handleToggleOutlet}
+              disabled={settingsLoading}
+              className={`w-full sm:w-48 h-11 sm:h-14 rounded-xl sm:rounded-2xl font-black text-white text-xs sm:text-base shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                settings?.isOutletOpen 
+                  ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' 
+                  : 'bg-green-500 hover:bg-green-600 shadow-green-500/20'
+              }`}
+            >
+              {settings?.isOutletOpen ? 'Close Outlet 🛑' : 'Open Outlet 🟢'}
+            </button>
+          </div>
+        </div>
+
+        {/* Dynamic reason input section */}
+        <div className="pt-6 border-t border-gray-100 flex flex-col gap-4">
+          <label className="text-xs font-black text-text uppercase tracking-widest">
+            {settings?.isOutletOpen ? 'Set Reason for Closing (displays when closed):' : 'Update Closing Reason:'}
+          </label>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <select
+                value={selectedReasonOption}
+                onChange={(e) => setSelectedReasonOption(e.target.value)}
+                className="flex-1 bg-background px-5 py-3.5 rounded-2xl text-sm font-bold border-2 border-gray-100 outline-none focus:border-primary/30 transition-all text-text cursor-pointer"
+              >
+                {REASON_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              {!settings?.isOutletOpen && (
+                <button
+                  onClick={() => {
+                    const finalReason = selectedReasonOption === 'custom' ? customReasonText : selectedReasonOption;
+                    dispatch(updateSetting({ key: 'closeReason', value: finalReason || 'baking and maintenance' })).then((action) => {
+                      if (action.meta.requestStatus === 'fulfilled') {
+                        toast.success('Close reason updated! 📝');
+                      } else {
+                        toast.error('Failed to update reason');
+                      }
+                    });
+                  }}
+                  disabled={settingsLoading}
+                  className="bg-primary hover:bg-primary/95 text-white font-black px-6 py-3.5 rounded-2xl text-sm transition-all shadow-lg shadow-primary/10 active:scale-95 shrink-0"
+                >
+                  Update Reason
+                </button>
+              )}
+            </div>
+
+            {selectedReasonOption === 'custom' && (
+              <div className="animate-fadeIn">
+                <input
+                  type="text"
+                  value={customReasonText}
+                  onChange={(e) => setCustomReasonText(e.target.value)}
+                  placeholder="Type your custom closing reason here..."
+                  className="w-full bg-background px-5 py-3.5 rounded-2xl text-sm font-bold border-2 border-primary/20 outline-none focus:border-primary/50 transition-all text-text"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8">
@@ -162,7 +317,7 @@ const AdminDashboard = () => {
             { icon: <RupeeIcon size={24} />, label: 'Total Revenue', value: `₹${stats?.totalRevenue.toFixed(2)}`, color: 'bg-green-100 text-green-600', trend: '+12.5%' },
             { icon: <ShoppingBag size={24} />, label: 'Total Orders', value: stats?.ordersCount, color: 'bg-primary/10 text-primary', trend: '+5.4%' },
             { icon: <CakeIcon size={24} />, label: 'Products', value: stats?.productsCount, color: 'bg-accent/10 text-accent', trend: '+2 new' },
-            { icon: <Users size={24} />, label: 'Active Users', value: '1,284', color: 'bg-blue-100 text-blue-600', trend: '+8.1%' },
+            { icon: <Users size={24} />, label: 'Active Users', value: stats?.usersCount || 0, color: 'bg-blue-100 text-blue-600', trend: '+8.1%' },
           ].map((item, i) => (
             <div key={i} className="bg-white p-6 xl:p-8 rounded-2xl xl:rounded-[32px] shadow-sm border border-gray-50 flex flex-col items-start gap-4 hover:shadow-md transition-all">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${item.color}`}>

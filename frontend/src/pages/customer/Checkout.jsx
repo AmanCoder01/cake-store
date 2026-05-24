@@ -16,6 +16,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, shippingAddress } = useSelector((state) => state.cart);
   const { token } = useSelector((state) => state.auth);
+  const { settings } = useSelector((state) => state.settings);
+  const isOutletClosed = settings?.isOutletOpen === false;
 
   const [step, setStep] = useState(1);
   const [isOrdering, setIsOrdering] = useState(false);
@@ -126,6 +128,10 @@ const Checkout = () => {
 
   // Proceed with selected address
   const handleContinueToPayment = () => {
+    if (isOutletClosed) {
+      toast.error('The outlet is currently closed. Order placement is disabled.');
+      return;
+    }
     const selected = getSelectedAddress();
     if (!selected) {
       toast.error('Please select or add a delivery address');
@@ -136,6 +142,10 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
+    if (isOutletClosed) {
+      toast.error('The outlet is currently closed. Order placement is disabled.');
+      return;
+    }
     const selected = getSelectedAddress();
     if (!selected) return;
 
@@ -325,13 +335,19 @@ const Checkout = () => {
 
                 {/* Continue Button */}
                 {!showAddForm && savedAddresses.length > 0 && (
-                  <Button
-                    onClick={handleContinueToPayment}
-                    size="lg"
-                    className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 group"
-                  >
-                    Continue to Payment <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                  isOutletClosed ? (
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-red-600 font-extrabold text-center leading-relaxed">
+                      🎂 We are currently closed due to: "{settings?.closeReason || 'baking and maintenance'}". Order placement is temporarily disabled.
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handleContinueToPayment}
+                      size="lg"
+                      className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 group"
+                    >
+                      Continue to Payment <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  )
                 )}
               </motion.div>
             )}
@@ -378,14 +394,20 @@ const Checkout = () => {
                   </div>
 
                   <div className="pt-8">
-                    <Button
-                      onClick={handlePlaceOrder}
-                      disabled={isOrdering}
-                      size="lg"
-                      className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20"
-                    >
-                      {isOrdering ? 'Placing Order...' : 'Place My Order'}
-                    </Button>
+                    {isOutletClosed ? (
+                      <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-red-600 font-extrabold text-center leading-relaxed">
+                        🎂 We are currently closed due to: "{settings?.closeReason || 'baking and maintenance'}". Order placement is temporarily disabled.
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={handlePlaceOrder}
+                        disabled={isOrdering}
+                        size="lg"
+                        className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20"
+                      >
+                        {isOrdering ? 'Placing Order...' : 'Place My Order'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </motion.div>

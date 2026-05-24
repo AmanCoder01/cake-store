@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { getSettings } from './store/slices/settingsSlice';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import AdminLayout from './components/layout/AdminLayout';
@@ -15,6 +16,7 @@ const ScrollToTop = () => {
 
   return null;
 };
+
 
 // Customer Pages
 import Home from './pages/customer/Home';
@@ -67,6 +69,12 @@ const AdminContainer = () => (
 );
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getSettings());
+  }, [dispatch]);
+
   return (
     <Router>
       <ScrollToTop />

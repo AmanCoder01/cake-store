@@ -109,6 +109,7 @@ const bannerRoutes = require('./routes/bannerRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const settingRoutes = require('./routes/settingRoutes');
 
 const errorMiddleware = require('./middleware/errorMiddleware');
 
@@ -122,6 +123,7 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/settings', settingRoutes);
 
 // Catch-all route for undefined routes
 app.use((req, res, next) => {

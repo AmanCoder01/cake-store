@@ -11,6 +11,18 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No order items' });
     }
 
+    // Check if outlet is open or closed
+    const Setting = require('../models/settingModel');
+    const isOutletOpenSetting = await Setting.findOne({ key: 'isOutletOpen' });
+    if (isOutletOpenSetting && isOutletOpenSetting.value === false) {
+      const closeReasonSetting = await Setting.findOne({ key: 'closeReason' });
+      const reason = closeReasonSetting ? closeReasonSetting.value : 'baking and maintenance';
+      return res.status(400).json({
+        status: 'fail',
+        message: `Sorry, our outlet is currently closed due to: "${reason}". We are not accepting new orders at this time.`
+      });
+    }
+
     const order = await Order.create({
       orderItems,
       user: req.user._id,
@@ -152,6 +164,7 @@ exports.getAdminStats = async (req, res) => {
 
     const ordersCount = await Order.countDocuments();
     const productsCount = await Product.countDocuments();
+    const usersCount = await User.countDocuments();
     
     // Revenue over time (last 7 days)
     const last7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -172,6 +185,7 @@ exports.getAdminStats = async (req, res) => {
         totalRevenue: totalSales[0]?.total || 0,
         ordersCount,
         productsCount,
+        usersCount,
         revenueStats
       }
     });
