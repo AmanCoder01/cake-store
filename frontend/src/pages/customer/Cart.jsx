@@ -113,9 +113,14 @@ const Cart = () => {
                 <span>Subtotal</span>
                 <span className="text-text">₹{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-secondary font-bold">
-                <span>Shipping</span>
-                <span>{shipping === 0 ? <span className="text-green-500">FREE</span> : `₹${shipping.toFixed(2)}`}</span>
+              <div className="flex justify-between text-secondary font-bold flex-col gap-0.5">
+                <div className="flex justify-between w-full">
+                  <span>Shipping</span>
+                  <span>{shipping === 0 ? <span className="text-green-500">FREE</span> : `₹${shipping.toFixed(2)}`}</span>
+                </div>
+                <div className="text-[10px] text-gray-400 font-bold text-left leading-normal">
+                  * Calculated based on distance to outlet at checkout.
+                </div>
               </div>
               <div className="flex justify-between text-secondary font-bold">
                 <span>Estimated Tax (5%)</span>
@@ -135,13 +140,13 @@ const Cart = () => {
               Checkout <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             
-            <div className="mt-8 flex flex-col items-center gap-4">
-              <p className="text-xs text-secondary font-medium">We accept secure payments</p>
-              <div className="flex gap-4 grayscale opacity-50">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-4" />
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4" />
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-4" />
+            <div className="mt-8 pt-6 border-t border-gray-50 flex flex-col items-center gap-2.5 text-center">
+              <div className="flex items-center gap-2 text-primary font-black uppercase text-[10px] tracking-widest bg-primary/10 px-3 py-1.5 rounded-full">
+                🛵 Doorstep Cash / UPI
               </div>
+              <p className="text-[11px] text-secondary font-bold leading-relaxed max-w-[260px]">
+                Pay safely at your doorstep via Cash or by scanning any UPI QR Code (GPay, PhonePe, Paytm) when your cake arrives!
+              </p>
             </div>
           </Card>
         </div>

@@ -11,6 +11,22 @@ import { APP_CONFIG } from '../../config/constants';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Calculate physical distance to Sunderpur, Varanasi outlet (25.2917, 82.9734) using Haversine formula
+const calculateHaversineDistance = (lat, lon) => {
+  const outletLat = 25.2917;
+  const outletLon = 82.9734;
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat - outletLat) * Math.PI / 180;
+  const dLon = (lon - outletLon) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(outletLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  const d = R * c; 
+  return Math.max(0.5, parseFloat(d.toFixed(1)));
+};
+
 const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -34,7 +50,103 @@ const Checkout = () => {
   const [formPostalCode, setFormPostalCode] = useState('');
   const [formCountry, setFormCountry] = useState('');
   const [formPhone, setFormPhone] = useState('');
+  const [formDistance, setFormDistance] = useState(1.5);
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
+
+  // Automatically calculate real geodesic distance when user is typing street or city
+  useEffect(() => {
+    if (!formAddress || !formCity) return;
+    if (formAddress.length < 5 && formCity.length < 3) return;
+
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const queryStr = `${formAddress}, ${formCity}`;
+        const res = await axios.get(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(queryStr)}&format=json&limit=1`
+        );
+
+        if (res.data && res.data.length > 0) {
+          const { lat, lon } = res.data[0];
+          const realDist = calculateHaversineDistance(parseFloat(lat), parseFloat(lon));
+          setFormDistance(realDist);
+        } else {
+          // Fallback to length heuristic if Nominatim finds nothing
+          const base = ((formAddress.length + formCity.length) % 8) + 1.2;
+          setFormDistance(parseFloat(base.toFixed(1)));
+        }
+      } catch (error) {
+        // Fallback on rate limits/network errors
+        const base = ((formAddress.length + formCity.length) % 8) + 1.2;
+        setFormDistance(parseFloat(base.toFixed(1)));
+      }
+    }, 1200);
+
+    return () => clearTimeout(delayDebounce);
+  }, [formAddress, formCity]);
+
+  // Autofill user's current location details (Street, City, Postal Code, Country) + calculate real distance
+  const handleAutofillLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setDetectingLocation(true);
+    toast.loading('📍 Detecting location & autofilling fields...', { id: 'geo-toast' });
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        const finalDist = calculateHaversineDistance(latitude, longitude);
+        setFormDistance(finalDist);
+
+        try {
+          // Query free OpenStreetMap Nominatim reverse geocoding API
+          const res = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+          );
+
+          if (res.data && res.data.address) {
+            const addr = res.data.address;
+            
+            // Build highly descriptive street name
+            const road = addr.road || addr.suburb || addr.neighbourhood || addr.village || '';
+            const house = addr.house_number || '';
+            const streetAddress = [house, road].filter(Boolean).join(', ') || res.data.display_name.split(',')[0] || 'Sundarpur Road';
+            
+            const city = addr.city || addr.town || addr.state_district || 'Varanasi';
+            const postal = addr.postcode || '221005';
+            const country = addr.country || 'India';
+
+            setFormAddress(streetAddress);
+            setFormCity(city);
+            setFormPostalCode(postal);
+            setFormCountry(country);
+
+            toast.success('Location autofilled successfully! 📍', { id: 'geo-toast' });
+          } else {
+            toast.error('Reverse geocoding failed.', { id: 'geo-toast' });
+          }
+        } catch (error) {
+          // Soft fallback to Varanasi outlet area parameters if geocoding times out or rate limits
+          setFormAddress('Chandpur Road, Sundarpur');
+          setFormCity('Varanasi');
+          setFormPostalCode('221005');
+          setFormCountry('India');
+          toast.success('Autofilled with Varanasi Outlet defaults! 📍', { id: 'geo-toast' });
+        } finally {
+          setDetectingLocation(false);
+        }
+      },
+      (error) => {
+        toast.error('Location permission blocked. Please click the Lock icon next to the URL bar and select "Allow Location" to auto-detect! 📍', { id: 'geo-toast', duration: 6000 });
+        setDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   useEffect(() => {
     if (cartItems.length === 0 && step !== 3) {
@@ -72,8 +184,32 @@ const Checkout = () => {
     return savedAddresses.find(a => a._id === selectedAddressId);
   };
 
+  const getDeliveryDetails = () => {
+    const selected = getSelectedAddress();
+    const distanceVal = selected ? (selected.distance !== undefined ? selected.distance : 1.5) : 1.5;
+    
+    // Check if it is late night (10 PM to 5 AM)
+    const currentHour = new Date().getHours();
+    const isLateNight = currentHour >= 22 || currentHour < 5;
+    
+    let baseShipping = 0;
+    if (distanceVal > 2) {
+      baseShipping = 50;
+    }
+    
+    const finalShipping = isLateNight ? baseShipping * 2 : baseShipping;
+    
+    return {
+      distanceVal,
+      isLateNight,
+      baseShipping,
+      finalShipping
+    };
+  };
+
+  const { distanceVal, isLateNight, finalShipping: shipping } = getDeliveryDetails();
+
   const subtotal = cartItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
-  const shipping = subtotal > 500 ? 0 : 50;
   const tax = subtotal * 0.05;
   const total = subtotal + shipping + tax;
 
@@ -88,6 +224,7 @@ const Checkout = () => {
         postalCode: formPostalCode,
         country: formCountry,
         phone: formPhone,
+        distance: formDistance,
         isDefault: savedAddresses.length === 0 // first address is default
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -102,6 +239,7 @@ const Checkout = () => {
       setFormPostalCode('');
       setFormCountry('');
       setFormPhone('');
+      setFormDistance(1.5);
       toast.success('Address saved!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save address');
@@ -273,6 +411,7 @@ const Checkout = () => {
                                 {addr.isDefault && (
                                   <span className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">Default</span>
                                 )}
+                                <span className="bg-gray-100 text-text text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">{addr.distance !== undefined ? addr.distance : 1.5} km</span>
                               </div>
                               <p className="text-secondary font-medium text-sm">
                                 {addr.city}, {addr.postalCode}, {addr.country}
@@ -281,9 +420,10 @@ const Checkout = () => {
                             </div>
                             <button
                               onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addr._id); }}
-                              className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                              title="Delete Address"
+                              className="p-2.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-2xl transition-all shrink-0 ml-2"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </div>
@@ -311,6 +451,18 @@ const Checkout = () => {
                         className="overflow-hidden"
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 pt-4">
+                          <div className="md:col-span-2 flex justify-end mb-1">
+                            <Button
+                              type="button"
+                              onClick={handleAutofillLocation}
+                              disabled={detectingLocation}
+                              variant="outline"
+                              size="sm"
+                              className="h-10 rounded-xl font-black text-xs flex items-center gap-1.5 border-2 border-primary/20 hover:border-primary/50 text-text"
+                            >
+                              {detectingLocation ? '📍 Detecting location...' : '📍 Use Current Location'}
+                            </Button>
+                          </div>
                           <div className="md:col-span-2">
                             <Input label="Street Address" value={formAddress} onChange={(e) => setFormAddress(e.target.value)} required placeholder="123 Sweet Street, Sector 14" />
                           </div>
@@ -319,7 +471,7 @@ const Checkout = () => {
                           <Input label="Country" value={formCountry} onChange={(e) => setFormCountry(e.target.value)} required placeholder="India" />
                           <Input label="Phone Number" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} required placeholder="+91 98765 43210" />
 
-                          <div className="md:col-span-2 mt-4 flex gap-4">
+                          <div className="md:col-span-2 mt-6 flex gap-4">
                             <Button type="submit" disabled={savingAddress} className="flex-grow h-12 rounded-2xl">
                               {savingAddress ? 'Saving...' : 'Save Address'}
                             </Button>
@@ -333,22 +485,7 @@ const Checkout = () => {
                   </AnimatePresence>
                 </div>
 
-                {/* Continue Button */}
-                {!showAddForm && savedAddresses.length > 0 && (
-                  isOutletClosed ? (
-                    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-red-600 font-extrabold text-center leading-relaxed">
-                      🎂 We are currently closed due to: "{settings?.closeReason || 'baking and maintenance'}". Order placement is temporarily disabled.
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={handleContinueToPayment}
-                      size="lg"
-                      className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 group"
-                    >
-                      Continue to Payment <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  )
-                )}
+
               </motion.div>
             )}
 
@@ -392,23 +529,6 @@ const Checkout = () => {
                       ) : null;
                     })()}
                   </div>
-
-                  <div className="pt-8">
-                    {isOutletClosed ? (
-                      <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-red-600 font-extrabold text-center leading-relaxed">
-                        🎂 We are currently closed due to: "{settings?.closeReason || 'baking and maintenance'}". Order placement is temporarily disabled.
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={handlePlaceOrder}
-                        disabled={isOrdering}
-                        size="lg"
-                        className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20"
-                      >
-                        {isOrdering ? 'Placing Order...' : 'Place My Order'}
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </motion.div>
             )}
@@ -437,9 +557,17 @@ const Checkout = () => {
                   <span>Subtotal</span>
                   <span className="text-text">₹{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-secondary font-bold text-sm">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? <span className="text-green-500">FREE</span> : `₹${shipping.toFixed(2)}`}</span>
+                <div className="flex justify-between text-secondary font-bold text-sm flex-col gap-0.5">
+                  <div className="flex justify-between w-full">
+                    <span>Shipping</span>
+                    <span>{shipping === 0 ? <span className="text-green-500">FREE</span> : `₹${shipping.toFixed(2)}`}</span>
+                  </div>
+                  {getSelectedAddress() && (
+                    <div className="text-[10px] text-gray-400 font-bold flex justify-between">
+                      <span>Distance: {distanceVal} km</span>
+                      {isLateNight && <span className="text-primary font-black animate-pulse">Late Night x2 🌙</span>}
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-between text-secondary font-bold text-sm">
                   <span>Tax (5%)</span>
@@ -449,6 +577,41 @@ const Checkout = () => {
                   <span className="font-bold text-text">Total</span>
                   <span className="text-xl font-extrabold text-primary">₹{total.toFixed(2)}</span>
                 </div>
+                {step === 1 && savedAddresses.length > 0 && !showAddForm && (
+                  <div className="pt-6">
+                    {isOutletClosed ? (
+                      <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-600 font-extrabold text-xs text-center leading-relaxed">
+                        🎂 We are currently closed due to: "{settings?.closeReason || 'baking and maintenance'}". Order placement is temporarily disabled.
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={handleContinueToPayment}
+                        size="lg"
+                        className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 group flex items-center justify-center gap-2"
+                      >
+                        Continue to Payment <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+                {step === 2 && (
+                  <div className="pt-6">
+                    {isOutletClosed ? (
+                      <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-600 font-extrabold text-xs text-center leading-relaxed">
+                        🎂 We are currently closed due to: "{settings?.closeReason || 'baking and maintenance'}". Order placement is temporarily disabled.
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={handlePlaceOrder}
+                        disabled={isOrdering}
+                        size="lg"
+                        className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 flex items-center justify-center gap-2"
+                      >
+                        {isOrdering ? 'Placing Order...' : 'Place My Order'}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </div>

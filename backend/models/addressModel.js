@@ -26,6 +26,11 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide your phone number']
   },
+  distance: {
+    type: Number,
+    required: [true, 'Please provide the distance to the outlet in km'],
+    default: 1.5
+  },
   isDefault: {
     type: Boolean,
     default: false
