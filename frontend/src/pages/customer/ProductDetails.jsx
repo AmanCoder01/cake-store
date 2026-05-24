@@ -8,9 +8,10 @@ import { getWishlist, toggleWishlist } from '../../store/slices/wishlistSlice';
 import Button from '../../components/ui/Button';
 import Skeleton from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { APP_CONFIG } from '../../config/constants';
+import Image from '../../components/ui/Image';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -22,9 +23,67 @@ const ProductDetails = () => {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
 
+  // Custom Variant state
+  const [selectedVariant, setSelectedVariant] = useState('');
+  const [customWeightInput, setCustomWeightInput] = useState('1.5');
+  const [isCustomWeightSelected, setIsCustomWeightSelected] = useState(false);
+
   // Reviews local states
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
+
+  // Helper to check if category is piece-based
+  const isPieceCategory = (cat) => {
+    if (!cat) return false;
+    const name = cat.toLowerCase();
+    return (
+      name.includes('pastry') ||
+      name.includes('pastries') ||
+      name.includes('cupcake') ||
+      name.includes('cupcakes') ||
+      name.includes('choco lava') ||
+      name.includes('choco-lava') ||
+      name.includes('chocolava') ||
+      name.includes('truffle')
+    );
+  };
+
+  useEffect(() => {
+    if (product) {
+      if (isPieceCategory(product.category)) {
+        setSelectedVariant('1 Piece');
+        setIsCustomWeightSelected(false);
+      } else {
+        setSelectedVariant('0.5 kg');
+        setIsCustomWeightSelected(false);
+      }
+    }
+  }, [product]);
+
+  // Get current variant multiplier
+  const getMultiplier = () => {
+    if (!product) return 1;
+    if (isPieceCategory(product.category)) {
+      if (selectedVariant && selectedVariant.includes('Piece')) {
+        const count = parseInt(selectedVariant) || 1;
+        return count;
+      }
+      return 1;
+    } else {
+      if (selectedVariant === '0.5 kg') {
+        return 1.0;
+      } else if (selectedVariant === '1 kg') {
+        return 2.0;
+      } else if (selectedVariant && selectedVariant.startsWith('Custom:')) {
+        const weight = parseFloat(selectedVariant.replace('Custom: ', '').replace(' kg', '')) || 0.5;
+        return weight / 0.5;
+      }
+      return 1.0;
+    }
+  };
+
+  const multiplier = getMultiplier();
+  const currentPrice = product ? product.price * multiplier : 0;
 
   useEffect(() => {
     dispatch(getProductDetails(id));
@@ -53,9 +112,10 @@ const ProductDetails = () => {
       product: product._id,
       name: product.name,
       image: product.images[0]?.url,
-      price: product.price,
+      price: currentPrice,
       stock: product.stock,
-      quantity: qty
+      quantity: qty,
+      selectedVariant: selectedVariant
     }));
     toast.success('Added to cart!');
   };
@@ -129,8 +189,8 @@ const ProductDetails = () => {
             layoutId={`img-${product._id}`}
             className="aspect-square rounded-2xl sm:rounded-[40px] overflow-hidden bg-white border border-gray-100 shadow-sm relative group"
           >
-            <img 
-              src={product.images[activeImg]?.url || 'https://via.placeholder.com/800'} 
+            <Image 
+              src={product.images[activeImg]?.url} 
               alt={product.name} 
               className="w-full h-full object-cover"
             />
@@ -153,7 +213,7 @@ const ProductDetails = () => {
                   activeImg === i ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
-                <img src={img.url} alt={`View ${i}`} className="w-full h-full object-cover" />
+                <Image src={img.url} alt={`View ${i}`} className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -175,8 +235,8 @@ const ProductDetails = () => {
           <h1 className="text-3xl sm:text-5xl font-black text-text mb-4 sm:mb-6 leading-tight">{product.name}</h1>
           
           <div className="flex flex-wrap items-baseline gap-3 mb-8">
-            <span className="text-2xl sm:text-4xl font-black text-primary">₹{product.price}</span>
-            <span className="text-base sm:text-lg text-secondary line-through">₹{(product.price * 1.2).toFixed(2)}</span>
+            <span className="text-2xl sm:text-4xl font-black text-primary">₹{currentPrice.toFixed(2)}</span>
+            <span className="text-base sm:text-lg text-secondary line-through">₹{(currentPrice * 1.2).toFixed(2)}</span>
             <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold uppercase">Save 20%</span>
           </div>
 
@@ -203,6 +263,122 @@ const ProductDetails = () => {
                 <p className="text-sm text-secondary">100% safe & certified</p>
               </div>
             </div>
+          </div>
+
+          {/* variant selector */}
+          <div className="mb-8 p-6 bg-gradient-to-br from-white to-background rounded-[24px] border border-primary/10 shadow-sm">
+            {isPieceCategory(product.category) ? (
+              <div>
+                <label className="block text-xs font-black text-secondary uppercase tracking-[2px] mb-4">
+                  Select Pieces 📦
+                </label>
+                <div className="flex flex-wrap gap-2.5">
+                  {['1 Piece', '2 Pieces', '4 Pieces', '6 Pieces', '12 Pieces'].map((opt) => {
+                    const count = parseInt(opt);
+                    const optPrice = product.price * count;
+                    const isSelected = selectedVariant === opt;
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setSelectedVariant(opt)}
+                        className={`flex-grow flex-1 min-w-[80px] xs:min-w-[90px] p-3.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 ${
+                          isSelected
+                            ? 'border-primary bg-primary/5 text-primary shadow-md scale-105'
+                            : 'border-gray-100 bg-white hover:border-primary/20 text-text hover:bg-primary/[0.02]'
+                        }`}
+                      >
+                        <span className="text-sm font-extrabold whitespace-nowrap">{opt}</span>
+                        <span className="text-xs font-black text-secondary mt-1">₹{optPrice.toFixed(0)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-black text-secondary uppercase tracking-[2px] mb-4">
+                  Choose Weight / Size 🎂
+                </label>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {[
+                    { label: '0.5 kg', val: '0.5 kg', price: product.price },
+                    { label: '1 kg', val: '1 kg', price: product.price * 2 },
+                    { label: 'Custom', val: 'Custom', price: null }
+                  ].map((opt) => {
+                    const isSelected = opt.val === 'Custom' ? isCustomWeightSelected : (selectedVariant === opt.val && !isCustomWeightSelected);
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => {
+                          if (opt.val === 'Custom') {
+                            setIsCustomWeightSelected(true);
+                            const parsedWeight = parseFloat(customWeightInput) || 1.5;
+                            setSelectedVariant(`Custom: ${parsedWeight} kg`);
+                          } else {
+                            setIsCustomWeightSelected(false);
+                            setSelectedVariant(opt.val);
+                          }
+                        }}
+                        className={`p-3.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 ${
+                          isSelected
+                            ? 'border-primary bg-primary/5 text-primary shadow-md scale-105'
+                            : 'border-gray-100 bg-white hover:border-primary/20 text-text hover:bg-primary/[0.02]'
+                        }`}
+                      >
+                        <span className="text-sm font-extrabold">{opt.label}</span>
+                        <span className="text-xs font-black text-secondary mt-1">
+                          {opt.price ? `₹${opt.price.toFixed(0)}` : 'Enter Kg'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom Weight Input */}
+                <AnimatePresence>
+                  {isCustomWeightSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 p-4 bg-white rounded-2xl border border-primary/10 space-y-3 overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-text uppercase tracking-wider">Specify Weight (in Kg)</span>
+                        <span className="text-xs font-extrabold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          ₹{((parseFloat(customWeightInput) || 1.5) / 0.5 * product.price).toFixed(0)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0.5"
+                          max="10"
+                          value={customWeightInput}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCustomWeightInput(val);
+                            const parsed = parseFloat(val);
+                            if (parsed && parsed >= 0.5) {
+                              setSelectedVariant(`Custom: ${parsed} kg`);
+                            }
+                          }}
+                          className="flex-grow px-4 py-2.5 rounded-xl border border-gray-100 bg-background text-sm font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          placeholder="e.g. 1.5"
+                        />
+                        <span className="text-sm font-black text-secondary">KG</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold leading-normal">
+                        * Minimum weight is 0.5 kg. Custom orders are baked specifically to your requirements.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
 
           {/* actions */}

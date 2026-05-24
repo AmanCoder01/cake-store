@@ -12,6 +12,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Skeleton from '../../components/ui/Skeleton';
 import Meta from '../../components/layout/Meta';
+import Image from '../../components/ui/Image';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -115,7 +116,7 @@ const Home = () => {
                   transition={{ duration: 1 }}
                   className="absolute inset-0"
                 >
-                  <img src={banners[currentBanner].image.url} className="w-full h-full object-cover" alt={banners[currentBanner].title} />
+                  <Image src={banners[currentBanner].image.url} className="w-full h-full object-cover" alt={banners[currentBanner].title} />
                   {/* Gradient overlay — stronger on mobile for readability */}
                   <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10 sm:via-black/40 sm:to-transparent" />
                   
@@ -189,8 +190,8 @@ const Home = () => {
           ) : (
             categories?.slice(0, 4).map((cat) => (
               <Link key={cat._id} to={`/products?category=${cat.name}`} className="group relative h-48 sm:h-80 rounded-[40px] overflow-hidden shadow-lg transition-all hover:-translate-y-2">
-                <img 
-                  src={cat.image?.url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=400'} 
+                <Image 
+                  src={cat.image?.url} 
                   alt={cat.name} 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                 />
@@ -243,8 +244,8 @@ const Home = () => {
             products?.map((product) => (
               <Card key={product._id} className="group flex flex-col h-full bg-white border border-gray-50 rounded-[32px] hover:shadow-2xl transition-all duration-500 overflow-hidden">
                 <Link to={`/products/${product._id}`} className="relative h-64 overflow-hidden rounded-[24px] m-2">
-                  <img
-                    src={product.images[0]?.url || 'https://via.placeholder.com/400'}
+                  <Image
+                    src={product.images[0]?.url}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -279,7 +280,10 @@ const Home = () => {
                     <p className="text-secondary text-sm mb-4 line-clamp-2">{product.description}</p>
                   </div>
                   <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                    <span className="text-2xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
+                    <div className="flex items-center flex-wrap gap-2.5">
+                      <span className="text-2xl font-black text-primary">₹{product.price}</span>
+                      <span className="text-sm text-secondary line-through font-bold">₹{(product.price * 1.2).toFixed(0)}</span>
+                    </div>
                     <Link to={`/products/${product._id}`}>
                         <div className="bg-background hover:bg-primary hover:text-white p-3 rounded-xl text-text transition-all active:scale-90">
                            <ArrowRight size={20} />

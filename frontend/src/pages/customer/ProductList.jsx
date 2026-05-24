@@ -11,6 +11,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Skeleton from '../../components/ui/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from '../../components/ui/Image';
 
 const ProductList = () => {
   const dispatch = useDispatch();
@@ -210,8 +211,8 @@ const ProductList = () => {
                 >
                   <Card className="group flex flex-col h-full bg-white border border-gray-50 rounded-[32px] hover:shadow-2xl transition-all duration-500 overflow-hidden">
                     <Link to={`/products/${product._id}`} className="relative h-64 overflow-hidden rounded-[24px] m-2">
-                      <img
-                        src={product.images[0]?.url || 'https://via.placeholder.com/400'}
+                      <Image
+                        src={product.images[0]?.url}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
@@ -246,7 +247,10 @@ const ProductList = () => {
                         <p className="text-secondary text-sm mb-4 line-clamp-2">{product.description}</p>
                       </div>
                       <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                        <span className="text-2xl font-extrabold text-text tracking-tighter">₹{product.price}</span>
+                        <div className="flex items-center flex-wrap gap-2.5">
+                          <span className="text-2xl font-black text-primary">₹{product.price}</span>
+                          <span className="text-sm text-secondary line-through font-bold">₹{(product.price * 1.2).toFixed(0)}</span>
+                        </div>
                         <Link to={`/products/${product._id}`}>
                             <div className="bg-background hover:bg-primary hover:text-white p-3 rounded-xl text-text transition-all active:scale-90 shadow-sm">
                                <ArrowRight size={20} />

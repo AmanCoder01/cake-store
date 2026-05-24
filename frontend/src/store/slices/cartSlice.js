@@ -14,19 +14,28 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action) => {
       const item = action.payload;
-      const existItem = state.cartItems.find((x) => x.product === item.product);
+      const variantKey = item.selectedVariant || '';
+      const cartItemId = `${item.product}-${variantKey}`;
+      
+      // Inject cartItemId into the item
+      const newItem = { ...item, cartItemId };
+
+      const existItem = state.cartItems.find((x) => x.cartItemId === cartItemId);
 
       if (existItem) {
         state.cartItems = state.cartItems.map((x) =>
-          x.product === existItem.product ? item : x
+          x.cartItemId === cartItemId ? newItem : x
         );
       } else {
-        state.cartItems = [...state.cartItems, item];
+        state.cartItems = [...state.cartItems, newItem];
       }
       localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
     },
     removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems.filter((x) => x.product !== action.payload);
+      const payload = action.payload;
+      state.cartItems = state.cartItems.filter(
+        (x) => x.cartItemId !== payload && x.product !== payload
+      );
       localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
     },
     saveShippingAddress: (state, action) => {

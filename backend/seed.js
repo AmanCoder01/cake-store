@@ -1,3 +1,6 @@
+// Force Node.js to use public DNS resolvers (Google & Cloudflare) to prevent ECONNREFUSED DNS lookup issues on some networks
+require('node:dns/promises').setServers(['8.8.8.8', '1.1.1.1']);
+
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Category = require('./models/categoryModel');
@@ -8,16 +11,40 @@ dotenv.config();
 
 const categories = [
   {
+    name: 'Cakes',
+    slug: 'cakes',
+    description: 'Savor our delightful range of freshly baked, standard daily cakes.',
+    image: { url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800' }
+  },
+  {
+    name: 'Pastries',
+    slug: 'pastries',
+    description: 'Flaky, creamy, and perfectly baked pastries for your daily treats.',
+    image: { url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800' }
+  },
+  {
+    name: 'Cupcakes',
+    slug: 'cupcakes',
+    description: 'Bite-sized delights available in a variety of gourmet flavors.',
+    image: { url: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&q=80&w=800' }
+  },
+  {
+    name: 'Choco Lava Cakes',
+    slug: 'choco-lava-cakes',
+    description: 'Gooey, molten chocolate centers that melt in your mouth.',
+    image: { url: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?auto=format&fit=crop&q=80&w=800' }
+  },
+  {
+    name: 'Custom Cakes',
+    slug: 'custom-cakes',
+    description: 'You dream it, we bake it. Fully personalized designs for unique celebrations.',
+    image: { url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }
+  },
+  {
     name: 'Birthday Cakes',
     slug: 'birthday-cakes',
     description: 'Make every birthday magical with our delightful range of handcrafted cakes.',
     image: { url: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800' }
-  },
-  {
-    name: 'Wedding Cakes',
-    slug: 'wedding-cakes',
-    description: 'Elegant multi-tier masterpieces designed for your most unforgettable moment.',
-    image: { url: 'https://images.unsplash.com/photo-15a3151419747-081642225d3a?auto=format&fit=crop&q=80&w=800' }
   },
   {
     name: 'Anniversary Cakes',
@@ -26,375 +53,588 @@ const categories = [
     image: { url: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&q=80&w=800' }
   },
   {
-    name: 'Eggless Special',
-    slug: 'eggless-special',
+    name: 'Chocolate Cakes',
+    slug: 'chocolate-cakes',
+    description: 'Rich, dark, and sinful chocolate cakes for the ultimate indulgence.',
+    image: { url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }
+  },
+  {
+    name: 'Eggless Cakes',
+    slug: 'eggless-cakes',
     description: 'Deliciously moist and 100% vegetarian cakes for everyone to enjoy.',
     image: { url: 'https://images.unsplash.com/photo-1606913084603-3e75bb77f9e2?auto=format&fit=crop&q=80&w=800' }
   },
   {
-    name: 'Custom Creations',
-    slug: 'custom-creations',
-    description: 'You dream it, we bake it. Fully personalized designs for unique celebrations.',
-    image: { url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }
+    name: 'Designer Cakes',
+    slug: 'designer-cakes',
+    description: 'Exquisite, artfully crafted modern cakes for aesthetic and upscale events.',
+    image: { url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }
   },
   {
-    name: 'Exquisite Cupcakes',
-    slug: 'exquisite-cupcakes',
-    description: 'Bite-sized delights available in a variety of gourmet flavors.',
-    image: { url: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&q=80&w=800' }
-  },
-  {
-    name: 'Artisan Pastries',
-    slug: 'artisan-pastries',
-    description: 'Flaky, creamy, and perfectly baked pastries for your daily treats.',
-    image: { url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800' }
-  },
-  {
-    name: 'Chocolate Decadence',
-    slug: 'chocolate-decadence',
-    description: 'Rich, dark, and sinful chocolate cakes for the ultimate indulgence.',
-    image: { url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }
+    name: 'Truffle cakes',
+    slug: 'truffle-cakes',
+    description: 'Velvety truffle-filled premium cakes designed to satisfy heavy cocoa cravings.',
+    image: { url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }
   }
 ];
 
 const products = [
-  // Birthday Cakes
+  // 1. Cakes
   {
-    name: 'Rainbow Confetti Blast',
-    description: 'A colorful surprise inside and out, perfect for kids and the young at heart.',
-    price: 35,
-    category: 'Birthday Cakes',
+    name: 'Classic Vanilla Sparkler',
+    description: 'Indulge in our classic moist vanilla sponge layered with silky sweet cream and colorful fun confetti.',
+    price: 350,
+    category: 'Cakes',
+    stock: 15,
+    images: [{ url: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=800' }],
+    isFeatured: true
+  },
+  {
+    name: 'Fresh Strawberry Cream Cake',
+    description: 'Vanilla sponge layered with fresh strawberries and sweet vanilla whipped cream.',
+    price: 420,
+    category: 'Cakes',
+    stock: 12,
+    images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Mango Mousse Delight',
+    description: 'A delicious tropical seasonal blend of sweet mango mousse and light vanilla sponge.',
+    price: 450,
+    category: 'Cakes',
     stock: 10,
+    images: [{ url: 'https://images.unsplash.com/photo-1534432182912-63863115e106?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Pineapple Sunshine Gateau',
+    description: 'The absolute favorite traditional sweet pineapple layered cake with juicy cherry accents.',
+    price: 380,
+    category: 'Cakes',
+    stock: 18,
+    images: [{ url: 'https://images.unsplash.com/photo-1557925923-33b27f891f88?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Butterscotch Crunch Cake',
+    description: 'Velvety butterscotch cream infused with golden caramelized sugar crystals for a beautiful crunch.',
+    price: 400,
+    category: 'Cakes',
+    stock: 20,
+    images: [{ url: 'https://images.unsplash.com/photo-1557925923-33b27f891f88?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Premium Mixed Fruit Forest',
+    description: 'Rich sponge topped and filled with a fresh forest of kiwi, apple, pomegranate, and seasonal fruits.',
+    price: 480,
+    category: 'Cakes',
+    stock: 14,
+    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 2. Pastries
+  {
+    name: 'French Butter Croissant',
+    description: 'Buttery, flaky, multi-layered golden pastry freshly baked to absolute perfection.',
+    price: 75,
+    category: 'Pastries',
+    stock: 35,
+    images: [{ url: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Chocolate Ganache Eclair',
+    description: 'Choux pastry filled with premium cream and glazed with rich dark chocolate ganache.',
+    price: 90,
+    category: 'Pastries',
+    stock: 25,
+    images: [{ url: 'https://images.unsplash.com/photo-1509365465985-25d11c17e812?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Almond Cream Horn',
+    description: 'Crispy rolled puff pastry horn filled with dense almond-infused premium cream.',
+    price: 85,
+    category: 'Pastries',
+    stock: 20,
+    images: [{ url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Blueberry Galette Slice',
+    description: 'A beautiful rustic freeform pastry filled with tangy fresh blueberries.',
+    price: 95,
+    category: 'Pastries',
+    stock: 18,
+    images: [{ url: 'https://images.unsplash.com/photo-1464305795204-6f5bbee7bb61?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Pistachio Baklava Slice',
+    description: 'Layers of paper-thin phyllo pastry filled with chopped pistachios and sweetened with syrup.',
+    price: 110,
+    category: 'Pastries',
+    stock: 30,
+    images: [{ url: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Strawberry Custard Tart',
+    description: 'A crisp buttery tart shell filled with vanilla pastry cream and topped with glazed fresh strawberries.',
+    price: 120,
+    category: 'Pastries',
+    stock: 15,
+    images: [{ url: 'https://images.unsplash.com/photo-1516739656515-aa4070fb9076?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 3. Cupcakes
+  {
+    name: 'Red Velvet Swirl Cupcake',
+    description: 'Light cocoa cupcake topped with a classic velvety smooth cream cheese frosting swirl.',
+    price: 60,
+    category: 'Cupcakes',
+    stock: 45,
+    images: [{ url: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&q=80&w=800' }],
+    isTrending: true
+  },
+  {
+    name: 'Belgian Chocolate Duo Cupcake',
+    description: 'Rich dark chocolate cupcake topped with a decadent whipped double chocolate buttercream.',
+    price: 70,
+    category: 'Cupcakes',
+    stock: 40,
+    images: [{ url: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Zesty Lemon Meringue Cupcake',
+    description: 'Tangy lemon-infused cupcake topped with a sweet, perfectly toasted fluffy meringue cloud.',
+    price: 65,
+    category: 'Cupcakes',
+    stock: 25,
+    images: [{ url: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Salted Caramel Drizzle Cupcake',
+    description: 'Fluffy vanilla cupcake filled with salted caramel and topped with caramel buttercream.',
+    price: 75,
+    category: 'Cupcakes',
+    stock: 30,
+    images: [{ url: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Matcha Green Tea Cupcake',
+    description: 'Infused with high-quality authentic Japanese matcha, topped with light green tea cream.',
+    price: 80,
+    category: 'Cupcakes',
+    stock: 20,
+    images: [{ url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Peanut Butter Cupcake',
+    description: 'Rich chocolate cupcake topped with a smooth and salty whipped peanut butter frosting.',
+    price: 85,
+    category: 'Cupcakes',
+    stock: 20,
+    images: [{ url: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 4. Choco Lava Cakes
+  {
+    name: 'Classic Molten Lava Cake',
+    description: 'Indulgent warm chocolate cake with a rich and gooey liquid chocolate center.',
+    price: 99,
+    category: 'Choco Lava Cakes',
+    stock: 50,
+    images: [{ url: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?auto=format&fit=crop&q=80&w=800' }],
+    isFeatured: true
+  },
+  {
+    name: 'Dark Chocolate Lava Extreme',
+    description: 'An intense cacao experience with a bitter-sweet molten chocolate lava explosion.',
+    price: 120,
+    category: 'Choco Lava Cakes',
+    stock: 35,
+    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Hazelnut Fudge Lava Surprise',
+    description: 'Gooey chocolate lava cake infused with roasted hazelnut paste and hazelnut drizzle.',
+    price: 130,
+    category: 'Choco Lava Cakes',
+    stock: 25,
+    images: [{ url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'White Chocolate Molten Lava',
+    description: 'A sweet twist with a rich molten white chocolate center inside a vanilla cake shell.',
+    price: 110,
+    category: 'Choco Lava Cakes',
+    stock: 20,
+    images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Salted Caramel Lava Explosion',
+    description: 'Molten core of sweet and salty golden caramel inside a delicious chocolate cake.',
+    price: 140,
+    category: 'Choco Lava Cakes',
+    stock: 30,
+    images: [{ url: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Nutella Lava Heart Cake',
+    description: 'Molten Nutella center that oozes out beautifully from a rich chocolate cake sponge.',
+    price: 150,
+    category: 'Choco Lava Cakes',
+    stock: 40,
+    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 5. Custom Cakes
+  {
+    name: 'Photographer Camera Cake',
+    description: 'A stunning fondant masterpiece shaped like a high-end DSLR camera, perfect for photographers.',
+    price: 1800,
+    category: 'Custom Cakes',
+    stock: 3,
+    images: [{ url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Vintage Suitcase Travel Cake',
+    description: 'Travel-themed cake designed like a stack of vintage suitcases with hand-painted map details.',
+    price: 2200,
+    category: 'Custom Cakes',
+    stock: 2,
+    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Retro Game Console Cake',
+    description: 'A highly nostalgic cake shaped like a classic gaming console with controller accessories.',
+    price: 1950,
+    category: 'Custom Cakes',
+    stock: 4,
+    images: [{ url: 'https://images.unsplash.com/photo-1499195333224-3ce974eecfb4?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Enchanted Fairy Garden Cake',
+    description: 'A whimsical multi-tier cake adorned with sugar flowers, fairies, and edible moss.',
+    price: 2500,
+    category: 'Custom Cakes',
+    stock: 2,
+    images: [{ url: 'https://images.unsplash.com/photo-1606913084603-3e75bb77f9e2?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Galaxy Space Exploration Cake',
+    description: 'Airbrushed cosmic background with edible planets and a custom sugar-sculpted rocket.',
+    price: 2100,
+    category: 'Custom Cakes',
+    stock: 3,
+    images: [{ url: 'https://images.unsplash.com/photo-1516739656515-aa4070fb9076?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Makeup Box Glamour Cake',
+    description: 'Elegant cake designed like a luxury cosmetics box with edible lipsticks, shadows, and brushes.',
+    price: 2000,
+    category: 'Custom Cakes',
+    stock: 4,
+    images: [{ url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 6. Birthday Cakes
+  {
+    name: 'Rainbow Confetti Blast Birthday',
+    description: 'A colorful surprise inside and out, perfect for kids and the young at heart.',
+    price: 450,
+    category: 'Birthday Cakes',
+    stock: 12,
     images: [{ url: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800' }],
     isFeatured: true
   },
   {
-    name: 'Golden Glow Birthday',
-    description: 'Elegant vanilla cake with metallic gold accents for a touch of luxury.',
-    price: 45,
+    name: 'Golden Glow Birthday Special',
+    description: 'Elegant vanilla birthday cake with metallic gold accents for a touch of luxury.',
+    price: 550,
     category: 'Birthday Cakes',
-    stock: 5,
+    stock: 8,
     images: [{ url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800' }]
   },
   {
     name: 'Superhero Adventure Cake',
     description: 'Fuel their imagination with our custom-themed superhero birthday cake.',
-    price: 55,
+    price: 650,
     category: 'Birthday Cakes',
-    stock: 8,
+    stock: 9,
     images: [{ url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'Strawberry Dream Tower',
-    description: 'Layers of fresh strawberries and cream, light and refreshing.',
-    price: 32,
+    name: 'Princess Tiara Birthday Cake',
+    description: 'A beautiful pink and white princess cake topped with a sparkling edible tiara.',
+    price: 700,
     category: 'Birthday Cakes',
-    stock: 12,
+    stock: 6,
     images: [{ url: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=800' }]
   },
   {
     name: 'Chocolate Overload Birthday',
-    description: 'Six layers of rich chocolate because one can never have enough chocolate.',
-    price: 40,
+    description: 'Layers of rich Belgian chocolate because one can never have enough chocolate.',
+    price: 500,
     category: 'Birthday Cakes',
     stock: 15,
-    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }],
+    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Oreo Cookies & Cream Birthday',
+    description: 'Vanilla sponge layered with crushed Oreos and cookies & cream frosting.',
+    price: 480,
+    category: 'Birthday Cakes',
+    stock: 10,
+    images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 7. Anniversary Cakes
+  {
+    name: 'Rose Gold Romance Anniversary',
+    description: 'A bouquet of beautiful edible rose gold roses on a delicate vanilla anniversary base.',
+    price: 650,
+    category: 'Anniversary Cakes',
+    stock: 8,
+    images: [{ url: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&q=80&w=800' }],
     isTrending: true
   },
-
-  // Wedding Cakes
   {
-    name: 'White Lace Elegance',
-    description: 'Traditional 3-tier wedding cake with intricate lace-pattern icing.',
-    price: 250,
-    category: 'Wedding Cakes',
-    stock: 2,
-    images: [{ url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Modern Marble Tiers',
-    description: 'Sleek geometric design with a stunning grey and white marble finish.',
-    price: 280,
-    category: 'Wedding Cakes',
-    stock: 2,
-    images: [{ url: 'https://images.unsplash.com/photo-1522765181514-4aedaf6264f1?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Rustic Floral Cascade',
-    description: 'Boho-chic naked cake adorned with fresh seasonal flowers.',
-    price: 180,
-    category: 'Wedding Cakes',
-    stock: 3,
-    images: [{ url: 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Royal Gold & Ivory',
-    description: 'Majestic cake with hand-painted gold leaf details.',
-    price: 350,
-    category: 'Wedding Cakes',
-    stock: 1,
-    images: [{ url: 'https://images.unsplash.com/photo-1510344426-5b487da5a706?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Pure Orchid Serenity',
-    description: 'Minimalist white cake featuring sugar-crafted exotic orchids.',
-    price: 220,
-    category: 'Wedding Cakes',
-    stock: 4,
-    images: [{ url: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?auto=format&fit=crop&q=80&w=800' }]
-  },
-
-  // Anniversary Cakes
-  {
-    name: 'Heartfelt Red Velvet',
-    description: 'Iconic heart-shaped cake with creamy cream cheese frosting.',
-    price: 38,
+    name: 'Sweetheart Red Velvet Special',
+    description: 'Iconic heart-shaped deep red velvet cake with creamy cream cheese frosting.',
+    price: 700,
     category: 'Anniversary Cakes',
     stock: 10,
     images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'Rose Romance Cake',
-    description: 'A bouquet of edible roses on a delicate vanilla base.',
-    price: 42,
+    name: 'Two-Tier Golden Jubilee Special',
+    description: 'Sparkling metallic gold details to celebrate fifty years of lasting love.',
+    price: 1200,
     category: 'Anniversary Cakes',
-    stock: 7,
-    images: [{ url: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&q=80&w=800' }]
+    stock: 4,
+    images: [{ url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'Together Forever Peak',
-    description: 'Two-tier cake symbolized the heights of your journey together.',
-    price: 65,
+    name: 'Together Forever Strawberry Peak',
+    description: 'Light strawberry layers symbolizing the heights of your beautiful journey together.',
+    price: 600,
     category: 'Anniversary Cakes',
-    stock: 5,
+    stock: 7,
     images: [{ url: 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'Midnight Love Chocolate',
-    description: 'Deep dark chocolate for the intense moments you share.',
-    price: 48,
+    name: 'Silver Metallic Elegance Cake',
+    description: 'Sleek modern silver leaf accents on a smooth white vanilla bean canvas.',
+    price: 850,
     category: 'Anniversary Cakes',
-    stock: 12,
-    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Golden Jubilee Special',
-    description: 'Sparkling metallic gold details to celebrate lasting bonds.',
-    price: 55,
-    category: 'Anniversary Cakes',
-    stock: 6,
-    images: [{ url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800' }]
-  },
-
-  // Eggless Special
-  {
-    name: 'Eggless Fruit Medley',
-    description: 'Packed with fresh tropical fruits and light sponge.',
-    price: 34,
-    category: 'Eggless Special',
-    stock: 15,
-    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Eggless Butterscotch Joy',
-    description: 'Crunchy caramel bits in a velvet-smooth eggless base.',
-    price: 36,
-    category: 'Eggless Special',
-    stock: 10,
-    images: [{ url: 'https://images.unsplash.com/photo-1557925923-33b27f891f88?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Eggless Choco Chips',
-    description: 'Our bestseller! Loaded with premium Belgian chocolate chips.',
-    price: 38,
-    category: 'Eggless Special',
-    stock: 20,
-    images: [{ url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Eggless Pistachio Cloud',
-    description: 'Infused with real pistachios and a hint of rose water.',
-    price: 45,
-    category: 'Eggless Special',
-    stock: 8,
-    images: [{ url: 'https://images.unsplash.com/photo-1516739656515-aa4070fb9076?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Eggless Mango Mousse',
-    description: 'Seasonal mango perfection in every bite.',
-    price: 40,
-    category: 'Eggless Special',
-    stock: 12,
-    images: [{ url: 'https://images.unsplash.com/photo-1534432182912-63863115e106?auto=format&fit=crop&q=80&w=800' }]
-  },
-
-  // Custom Creations
-  {
-    name: 'The Photographer Cake',
-    description: 'Hyper-realistic camera design for the lens lovers.',
-    price: 95,
-    category: 'Custom Creations',
-    stock: 3,
-    images: [{ url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Aviation Enthusiast Globe',
-    description: 'Hand-painted globe cake with a miniature aircraft.',
-    price: 110,
-    category: 'Custom Creations',
-    stock: 2,
-    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Gamer Nirvana Console',
-    description: 'Your favorite console brought to life in chocolate and fondant.',
-    price: 85,
-    category: 'Custom Creations',
     stock: 5,
-    images: [{ url: 'https://images.unsplash.com/photo-1499195333224-3ce974eecfb4?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Botanical Garden Theme',
-    description: 'Intricate sugar flowers and greenery for nature lovers.',
-    price: 120,
-    category: 'Custom Creations',
-    stock: 3,
-    images: [{ url: 'https://images.unsplash.com/photo-1606913084603-3e75bb77f9e2?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Space Explorer Rocket',
-    description: 'Reach for the stars with this vibrant cosmic cake.',
-    price: 105,
-    category: 'Custom Creations',
-    stock: 4,
-    images: [{ url: 'https://images.unsplash.com/photo-1516739656515-aa4070fb9076?auto=format&fit=crop&q=80&w=800' }]
-  },
-
-  // Exquisite Cupcakes
-  {
-    name: 'Red Velvet Swirl',
-    description: 'Classic red velvet with a silky smooth frosting.',
-    price: 4,
-    category: 'Exquisite Cupcakes',
-    stock: 50,
-    images: [{ url: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Belgian Choco Duo',
-    description: 'Double chocolate bliss in a compact package.',
-    price: 5,
-    category: 'Exquisite Cupcakes',
-    stock: 45,
     images: [{ url: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'Zesty Lemon Peak',
-    description: 'Refreshing citrus punch with high-quality meringue.',
-    price: 4.5,
-    category: 'Exquisite Cupcakes',
-    stock: 30,
-    images: [{ url: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Salted Caramel Bliss',
-    description: 'Perfect balance of sweet and salty flavors.',
-    price: 5.5,
-    category: 'Exquisite Cupcakes',
-    stock: 25,
-    images: [{ url: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Matcha Green Zen',
-    description: 'Authentic Japanese matcha infused cupcake.',
-    price: 6,
-    category: 'Exquisite Cupcakes',
-    stock: 20,
-    images: [{ url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800' }]
+    name: 'Midnight Truffle Rose Cake',
+    description: 'Deep chocolate truffle cake decorated with dark roses for romantic celebrations.',
+    price: 750,
+    category: 'Anniversary Cakes',
+    stock: 9,
+    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
   },
 
-  // Artisan Pastries
+  // 8. Chocolate Cakes
   {
-    name: 'French Butter Croissant',
-    description: 'Baked to golden perfection with 100% grass-fed butter.',
-    price: 3.5,
-    category: 'Artisan Pastries',
-    stock: 40,
-    images: [{ url: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Almond Cream Horn',
-    description: 'Crispy pastry filled with rich almond-infused cream.',
-    price: 4.8,
-    category: 'Artisan Pastries',
-    stock: 20,
-    images: [{ url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Blueberry Galette',
-    description: 'Rustic pastry filled with fresh, bursting blueberries.',
-    price: 5.5,
-    category: 'Artisan Pastries',
-    stock: 15,
-    images: [{ url: 'https://images.unsplash.com/photo-1464305795204-6f5bbee7bb61?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Chocolate Ganache Eclair',
-    description: 'Light choux pastry filled with dark chocolate ganache.',
-    price: 4.2,
-    category: 'Artisan Pastries',
-    stock: 25,
-    images: [{ url: 'https://images.unsplash.com/photo-1509365465985-25d11c17e812?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Pistachio Baklava',
-    description: 'Layers of thin pastry and premium Iranian pistachios.',
-    price: 6.5,
-    category: 'Artisan Pastries',
+    name: 'Triple Chocolate Hazard Cake',
+    description: 'Dark, milk, and white chocolate layered for the ultimate chocolate lovers dream.',
+    price: 550,
+    category: 'Chocolate Cakes',
     stock: 12,
-    images: [{ url: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&q=80&w=800' }]
-  },
-
-  // Chocolate Decadence
-  {
-    name: 'Triple Chocolate Hazard',
-    description: 'Dark, milk, and white chocolate layered for the brave.',
-    price: 50,
-    category: 'Chocolate Decadence',
-    stock: 10,
     images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }],
     isFeatured: true
   },
   {
-    name: 'Black Forest Intense',
-    description: 'Traditional German recipe with soaked cherries and deep cacao.',
-    price: 45,
-    category: 'Chocolate Decadence',
-    stock: 8,
+    name: 'Black Forest Intense Cake',
+    description: 'Traditional German recipe with dark cherries, chocolate shavings, and fresh cream.',
+    price: 480,
+    category: 'Chocolate Cakes',
+    stock: 10,
     images: [{ url: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'Choco-Lava Extreme',
-    description: 'Gooey, molten chocolate center that melts in your mouth.',
-    price: 12,
-    category: 'Chocolate Decadence',
-    stock: 20,
-    images: [{ url: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?auto=format&fit=crop&q=80&w=800' }]
-  },
-  {
-    name: 'Hazelnut Truffle Peak',
-    description: 'Infused with roasted hazelnuts and creamy truffle filling.',
-    price: 55,
-    category: 'Chocolate Decadence',
-    stock: 6,
+    name: 'Nutella Hazelnut Praline Cake',
+    description: 'Lush hazelnut chocolate sponge layered with creamy Nutella and crunchy pralines.',
+    price: 620,
+    category: 'Chocolate Cakes',
+    stock: 8,
     images: [{ url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }]
   },
   {
-    name: 'White Chocolate Symphony',
-    description: 'Pure, velvety white chocolate for a lighter cocoa experience.',
-    price: 42,
-    category: 'Chocolate Decadence',
-    stock: 12,
+    name: 'Dark Chocolate Fudge Silk Cake',
+    description: 'Super smooth, melt-in-the-mouth chocolate fudge cake with premium dark cocoa.',
+    price: 580,
+    category: 'Chocolate Cakes',
+    stock: 11,
+    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Belgian Dark Cacao Masterpiece',
+    description: 'Dense, rich chocolate sponge covered in a luxurious glaze of imported Belgian cacao.',
+    price: 700,
+    category: 'Chocolate Cakes',
+    stock: 6,
+    images: [{ url: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'German Chocolate Layer Cake',
+    description: 'Decadent chocolate cake loaded with a sweet coconut-pecan filling and icing.',
+    price: 650,
+    category: 'Chocolate Cakes',
+    stock: 7,
     images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 9. Eggless Cakes
+  {
+    name: 'Eggless Fruit Medley Delight',
+    description: 'Packed with fresh tropical fruits, vanilla sponge, and completely eggless.',
+    price: 420,
+    category: 'Eggless Cakes',
+    stock: 15,
+    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Eggless Butterscotch Bliss',
+    description: 'Crunchy caramel butterscotch bits in a velvety smooth 100% vegetarian cake.',
+    price: 440,
+    category: 'Eggless Cakes',
+    stock: 12,
+    images: [{ url: 'https://images.unsplash.com/photo-1557925923-33b27f891f88?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Eggless Choco Chip Loaded Cake',
+    description: 'A vegetarian favorite! Loaded with premium semi-sweet Belgian chocolate chips.',
+    price: 460,
+    category: 'Eggless Cakes',
+    stock: 20,
+    images: [{ url: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Eggless Pistachio Cloud Cake',
+    description: 'Delicately infused with real ground pistachios and a sweet hint of rose water.',
+    price: 520,
+    category: 'Eggless Cakes',
+    stock: 8,
+    images: [{ url: 'https://images.unsplash.com/photo-1516739656515-aa4070fb9076?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Eggless Mango Cream Harmony',
+    description: 'Smooth seasonal mango puree and fresh cream in a vegetarian sponge cake.',
+    price: 480,
+    category: 'Eggless Cakes',
+    stock: 10,
+    images: [{ url: 'https://images.unsplash.com/photo-1534432182912-63863115e106?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Eggless Rich Velvet Cream Cake',
+    description: '100% eggless red velvet sponge layered with sweet vanilla cream cheese frosting.',
+    price: 500,
+    category: 'Eggless Cakes',
+    stock: 14,
+    images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 10. Designer Cakes
+  {
+    name: 'Geometric Marble Gold Cake',
+    description: 'A sleek modern designer cake with a grey marble fondant finish and gold leaf accents.',
+    price: 1250,
+    category: 'Designer Cakes',
+    stock: 4,
+    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }],
+    isFeatured: true
+  },
+  {
+    name: 'Botanical Eucalyptus Cake',
+    description: 'Intricately detailed watercolor cake decorated with organic sugar eucalyptus leaves.',
+    price: 1400,
+    category: 'Designer Cakes',
+    stock: 3,
+    images: [{ url: 'https://images.unsplash.com/photo-1606913084603-3e75bb77f9e2?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Watercolor Pastel Dream',
+    description: 'A beautiful hand-painted abstract watercolor style cake in soft pastel hues.',
+    price: 1100,
+    category: 'Designer Cakes',
+    stock: 5,
+    images: [{ url: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Royal Ivory Lace Elegance',
+    description: 'A classic design featuring royal edible lace wraps on a smooth ivory fondant tier.',
+    price: 1650,
+    category: 'Designer Cakes',
+    stock: 2,
+    images: [{ url: 'https://images.unsplash.com/photo-1535254973040-607b474cb8c2?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Modern Concrete Style Cake',
+    description: 'Industrial-chic design featuring textured stone-look icing and vibrant dried flowers.',
+    price: 1300,
+    category: 'Designer Cakes',
+    stock: 4,
+    images: [{ url: 'https://images.unsplash.com/photo-1519340333755-cf6a57882322?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Floating Flower Tiered Design',
+    description: 'Multi-tiered masterpiece featuring suspended transparent separators and edible florals.',
+    price: 2200,
+    category: 'Designer Cakes',
+    stock: 2,
+    images: [{ url: 'https://images.unsplash.com/photo-1606913084603-3e75bb77f9e2?auto=format&fit=crop&q=80&w=800' }]
+  },
+
+  // 11. Truffle cakes
+  {
+    name: 'Belgian Chocolate Truffle Cake',
+    description: 'Dense chocolate cake with a rich and velvety Belgian chocolate truffle filling.',
+    price: 550,
+    category: 'Truffle cakes',
+    stock: 12,
+    images: [{ url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }],
+    isTrending: true
+  },
+  {
+    name: 'Hazelnut Truffle Cream Cake',
+    description: 'Truffle cake infused with roasted hazelnut paste and topped with truffle swirls.',
+    price: 580,
+    category: 'Truffle cakes',
+    stock: 10,
+    images: [{ url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Dark Chocolate Truffle Decadence',
+    description: 'Deep dark chocolate cake layered with heavy chocolate truffle ganache.',
+    price: 600,
+    category: 'Truffle cakes',
+    stock: 11,
+    images: [{ url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'White Chocolate Truffle Harmony',
+    description: 'Creamy white chocolate truffle ganache layered inside a fluffy white sponge.',
+    price: 520,
+    category: 'Truffle cakes',
+    stock: 8,
+    images: [{ url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Raspberry Chocolate Truffle Fusion',
+    description: 'Rich chocolate truffle layers balanced with a tart and tangy raspberry compote.',
+    price: 620,
+    category: 'Truffle cakes',
+    stock: 9,
+    images: [{ url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }]
+  },
+  {
+    name: 'Caramel Truffle Crunch Cake',
+    description: 'Chocolate truffle cake layered with butter caramel swirls and crunchy toffee bits.',
+    price: 640,
+    category: 'Truffle cakes',
+    stock: 15,
+    images: [{ url: 'https://images.unsplash.com/photo-1559620192-032c4bc4674e?auto=format&fit=crop&q=80&w=800' }]
   }
 ];
 
@@ -431,7 +671,7 @@ const seedDB = async () => {
     await Banner.insertMany(banners);
     await Product.insertMany(products);
 
-    console.log('Seeding successful! Added 8 categories, 2 banners, and 40 products.');
+    console.log(`Seeding successful! Added ${categories.length} categories, ${banners.length} banners, and ${products.length} products.`);
     process.exit();
   } catch (err) {
     console.error('Seeding failed:', err);

@@ -16,7 +16,8 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'Product',
         required: true
-      }
+      },
+      selectedVariant: { type: String }
     }
   ],
   shippingAddress: {

@@ -4,6 +4,7 @@ import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, ChevronLeft } from 'lucid
 import { addToCart, removeFromCart } from '../../store/slices/cartSlice';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import Image from '../../components/ui/Image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Cart = () => {
@@ -54,14 +55,14 @@ const Cart = () => {
           <AnimatePresence>
             {cartItems.map((item) => (
               <motion.div
-                key={item.product}
+                key={item.cartItemId || item.product}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-50 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 group"
               >
                 <Link to={`/products/${item.product}`} className="w-32 h-32 rounded-2xl overflow-hidden shrink-0">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </Link>
                 
                 <div className="flex-grow flex flex-col sm:flex-row justify-between items-center w-full gap-6">
@@ -69,7 +70,14 @@ const Cart = () => {
                     <Link to={`/products/${item.product}`} className="text-xl font-black text-text hover:text-primary transition-colors line-clamp-1 mb-1">
                       {item.name}
                     </Link>
-                    <p className="text-primary font-black text-lg">₹{item.price}</p>
+                    {item.selectedVariant && (
+                      <div className="mb-2">
+                        <span className="inline-block bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          {item.selectedVariant}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-primary font-black text-lg">₹{item.price.toFixed(2)}</p>
                   </div>
 
                   <div className="flex items-center bg-background rounded-2xl p-1">
@@ -91,7 +99,7 @@ const Cart = () => {
                   <div className="text-right flex items-center gap-6">
                     <p className="text-xl font-black text-text">₹{(item.price * item.quantity).toFixed(2)}</p>
                     <button 
-                      onClick={() => dispatch(removeFromCart(item.product))}
+                      onClick={() => dispatch(removeFromCart(item.cartItemId || item.product))}
                       className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                     >
                       <Trash2 size={20} />

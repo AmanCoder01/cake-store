@@ -17,12 +17,12 @@ const calculateHaversineDistance = (lat, lon) => {
   const R = 6371; // Earth's radius in km
   const dLat = (lat - outletLat) * Math.PI / 180;
   const dLon = (lon - outletLon) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(outletLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  const d = R * c; 
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(outletLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c;
   return Math.max(0.5, parseFloat(d.toFixed(1)));
 };
 
@@ -127,7 +127,7 @@ const ManageAddresses = () => {
 
             const city = addr.city || addr.town || addr.state_district || 'Varanasi';
             const postal = addr.postcode || '221005';
-                        const country = addr.country || 'India';
+            const country = addr.country || 'India';
             setFormAddress(streetAddress);
             setFormCity(city);
             setFormPostalCode(postal);
@@ -266,85 +266,85 @@ const ManageAddresses = () => {
                 </button>
               </div>
 
-                 <form onSubmit={handleSaveAddress} className="space-y-6">
-                 {/* Simulated Geolocation Status Banner inside manager form */}
-                 {!hasGeolocated && (
-                   <div className="p-4 bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-extrabold mb-4 animate-pulse">
-                     <span>⚠️ Please click "Use Current Location" first to set your coordinates and shipping distance accurately.</span>
-                   </div>
-                 )}
-                 {hasGeolocated && (
-                   <div className="p-4 bg-primary/5 border border-primary/10 text-primary rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black mb-4">
-                     <span className="flex items-center gap-2 text-left">
-                       <MapPin size={16} className="text-primary shrink-0" />
-                       Distance calculated to Sundarpur Varanasi Outlet:
-                     </span>
-                     <span className="bg-primary text-white px-3 py-0.5 rounded-full font-black shrink-0 w-fit">
-                       {formDistance} KM
-                     </span>
-                   </div>
-                 )}
+              <form onSubmit={handleSaveAddress} className="space-y-6">
+                {/* Simulated Geolocation Status Banner inside manager form */}
+                {!hasGeolocated && (
+                  <div className="p-4 bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-extrabold mb-4 animate-pulse">
+                    <span>⚠️ Please click "Use Current Location" first to set your coordinates and shipping distance accurately.</span>
+                  </div>
+                )}
+                {hasGeolocated && (
+                  <div className="p-4 bg-primary/5 border border-primary/10 text-primary rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black mb-4">
+                    <span className="flex items-center gap-2 text-left">
+                      <MapPin size={16} className="text-primary shrink-0" />
+                      Distance calculated to Sundarpur Varanasi Outlet:
+                    </span>
+                    <span className="bg-primary text-white px-3 py-0.5 rounded-full font-black shrink-0 w-fit">
+                      {formDistance} KM
+                    </span>
+                  </div>
+                )}
 
-                 <Input
-                   label="Street Address / Area (Refine your street, house, landmark)"
-                   placeholder={hasGeolocated ? "e.g. Flat 301, Vaishno Vihar" : "⚠️ Click 'Use Current Location' first"}
-                   value={formAddress}
-                   onChange={(e) => setFormAddress(e.target.value)}
-                   disabled={!hasGeolocated}
-                   required
-                 />
+                <Input
+                  label="Street Address / Area (Refine your street, house, landmark)"
+                  placeholder={hasGeolocated ? "e.g. Flat 301, Vaishno Vihar" : "⚠️ Click 'Use Current Location' first"}
+                  value={formAddress}
+                  onChange={(e) => setFormAddress(e.target.value)}
+                  disabled={!hasGeolocated}
+                  required
+                />
 
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                   <Input
-                     label="City"
-                     placeholder="City"
-                     value={formCity}
-                     disabled={!hasGeolocated}
-                     readOnly={hasGeolocated}
-                     required
-                   />
-                   <Input
-                     label="Postal Code"
-                     placeholder="Postal Code"
-                     value={formPostalCode}
-                     disabled={!hasGeolocated}
-                     readOnly={hasGeolocated}
-                     required
-                   />
-                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <Input
+                    label="City"
+                    placeholder="City"
+                    value={formCity}
+                    disabled={!hasGeolocated}
+                    readOnly={hasGeolocated}
+                    required
+                  />
+                  <Input
+                    label="Postal Code"
+                    placeholder="Postal Code"
+                    value={formPostalCode}
+                    disabled={!hasGeolocated}
+                    readOnly={hasGeolocated}
+                    required
+                  />
+                </div>
 
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                   <Input
-                     label="Country"
-                     placeholder="India"
-                     value={formCountry}
-                     disabled
-                   />
-                   <Input
-                     label="Phone Number (For Delivery)"
-                     placeholder="e.g. 9876543210"
-                     type="tel"
-                     value={formPhone}
-                     onChange={(e) => setFormPhone(e.target.value)}
-                     required
-                   />
-                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <Input
+                    label="Country"
+                    placeholder="India"
+                    value={formCountry}
+                    disabled
+                  />
+                  <Input
+                    label="Phone Number (For Delivery)"
+                    placeholder="e.g. 9876543210"
+                    type="tel"
+                    value={formPhone}
+                    onChange={(e) => setFormPhone(e.target.value)}
+                    required
+                  />
+                </div>
 
-                 <div className="flex gap-4 pt-4">
-                   <Button
-                     type="submit"
-                     disabled={savingAddress || !hasGeolocated}
-                     className="flex-1 rounded-xl shadow-lg font-black"
-                   >
-                     {savingAddress ? 'Saving Location...' : !hasGeolocated ? 'Lock Location to Save Address' : 'Save Location Address'}
-                   </Button>
-                   <Button
-                     type="button"
-                     variant="outline"
-                     className="rounded-xl"
-                     onClick={() => setShowAddForm(false)}
-                   >
-                     Cancel
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    type="submit"
+                    disabled={savingAddress || !hasGeolocated}
+                    className="flex-1 rounded-xl shadow-lg font-black"
+                  >
+                    {savingAddress ? 'Saving Location...' : !hasGeolocated ? 'Lock Location to Save Address' : 'Save Location Address'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => setShowAddForm(false)}
+                  >
+                    Cancel
                   </Button>
                 </div>
               </form>
@@ -363,9 +363,8 @@ const ManageAddresses = () => {
             {addresses.map((addr) => (
               <div
                 key={addr._id}
-                className={`p-5 sm:p-6 rounded-[30px] border-2 bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-md ${
-                  addr.isDefault ? 'border-primary/40 shadow-sm' : 'border-gray-100'
-                }`}
+                className={`p-5 sm:p-6 rounded-[30px] border-2 bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-md ${addr.isDefault ? 'border-primary/40 shadow-sm' : 'border-gray-100'
+                  }`}
               >
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-gray-50 text-secondary rounded-2xl shrink-0 mt-1">

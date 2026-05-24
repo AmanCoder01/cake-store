@@ -8,6 +8,7 @@ import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import axios from 'axios';
 import { APP_CONFIG } from '../../config/constants';
+import Image from '../../components/ui/Image';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,12 +19,12 @@ const calculateHaversineDistance = (lat, lon) => {
   const R = 6371; // Earth's radius in km
   const dLat = (lat - outletLat) * Math.PI / 180;
   const dLon = (lon - outletLon) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(outletLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  const d = R * c; 
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(outletLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c;
   return Math.max(0.5, parseFloat(d.toFixed(1)));
 };
 
@@ -95,11 +96,11 @@ const Checkout = () => {
 
     setDetectingLocation(true);
     toast.loading('📍 Detecting location & autofilling fields...', { id: 'geo-toast' });
-    
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        
+
         const finalDist = calculateHaversineDistance(latitude, longitude);
         setFormDistance(finalDist);
 
@@ -111,12 +112,12 @@ const Checkout = () => {
 
           if (res.data && res.data.address) {
             const addr = res.data.address;
-            
+
             // Build highly descriptive street name
             const road = addr.road || addr.suburb || addr.neighbourhood || addr.village || '';
             const house = addr.house_number || '';
             const streetAddress = [house, road].filter(Boolean).join(', ') || res.data.display_name.split(',')[0] || 'Sundarpur Road';
-            
+
             const city = addr.city || addr.town || addr.state_district || 'Varanasi';
             const postal = addr.postcode || '221005';
             const country = addr.country || 'India';
@@ -190,18 +191,18 @@ const Checkout = () => {
   const getDeliveryDetails = () => {
     const selected = getSelectedAddress();
     const distanceVal = selected ? (selected.distance !== undefined ? selected.distance : 1.5) : 1.5;
-    
+
     // Check if it is late night (10 PM to 5 AM)
     const currentHour = new Date().getHours();
     const isLateNight = currentHour >= 22 || currentHour < 5;
-    
+
     let baseShipping = 0;
     if (distanceVal > 2) {
       baseShipping = 50;
     }
-    
+
     const finalShipping = isLateNight ? baseShipping * 2 : baseShipping;
-    
+
     return {
       distanceVal,
       isLateNight,
@@ -299,7 +300,8 @@ const Checkout = () => {
           quantity: item.quantity,
           image: item.image,
           price: item.price,
-          product: item.product
+          product: item.product,
+          selectedVariant: item.selectedVariant
         })),
         shippingAddress: {
           address: selected.address,
@@ -335,17 +337,15 @@ const Checkout = () => {
         {[{ n: 1, label: 'Address' }, { n: 2, label: 'Payment' }, { n: 3, label: 'Done' }].map((s, idx) => (
           <div key={s.n} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-2">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all ${
-                step >= s.n ? 'bg-primary text-white shadow-lg' : 'bg-white text-gray-300 border-2 border-gray-100'
-              }`}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all ${step >= s.n ? 'bg-primary text-white shadow-lg' : 'bg-white text-gray-300 border-2 border-gray-100'
+                }`}>
                 {step > s.n ? <CheckCircle2 size={24} /> : s.n}
               </div>
               <span className={`text-xs font-bold ${step >= s.n ? 'text-primary' : 'text-gray-300'}`}>{s.label}</span>
             </div>
             {s.n < 3 && (
-              <div className={`flex-grow h-1.5 mx-4 rounded-full transition-all ${
-                step > s.n ? 'bg-primary' : 'bg-gray-100'
-              }`} />
+              <div className={`flex-grow h-1.5 mx-4 rounded-full transition-all ${step > s.n ? 'bg-primary' : 'bg-gray-100'
+                }`} />
             )}
           </div>
         ))}
@@ -392,60 +392,58 @@ const Checkout = () => {
                       {(savedAddresses.find(a => a._id === selectedAddressId)
                         ? [savedAddresses.find(a => a._id === selectedAddressId)]
                         : [savedAddresses[0]]).map((addr) => (
-                        <div
-                          key={addr._id}
-                          onClick={() => setSelectedAddressId(addr._id)}
-                          className={`relative p-6 rounded-3xl border-2 cursor-pointer transition-all group ${
-                            selectedAddressId === addr._id
-                              ? 'border-primary bg-primary/5 shadow-md'
-                              : 'border-gray-100 hover:border-primary/30 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${
-                              selectedAddressId === addr._id
-                                ? 'border-primary bg-primary'
-                                : 'border-gray-300'
-                            }`}>
-                              {selectedAddressId === addr._id && (
-                                <CheckCircle2 size={16} className="text-white" />
-                              )}
-                            </div>
-                            <div className="flex-grow">
-                              <div className="flex items-center gap-3 mb-2">
-                                <p className="font-black text-text">{addr.address}</p>
-                                {addr.isDefault && (
-                                  <span className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">Default</span>
+                          <div
+                            key={addr._id}
+                            onClick={() => setSelectedAddressId(addr._id)}
+                            className={`relative p-6 rounded-3xl border-2 cursor-pointer transition-all group ${selectedAddressId === addr._id
+                                ? 'border-primary bg-primary/5 shadow-md'
+                                : 'border-gray-100 hover:border-primary/30 bg-white'
+                              }`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${selectedAddressId === addr._id
+                                  ? 'border-primary bg-primary'
+                                  : 'border-gray-300'
+                                }`}>
+                                {selectedAddressId === addr._id && (
+                                  <CheckCircle2 size={16} className="text-white" />
                                 )}
-                                <span className="bg-gray-100 text-text text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">{addr.distance !== undefined ? addr.distance : 1.5} km</span>
                               </div>
-                              <p className="text-secondary font-medium text-sm">
-                                {addr.city}, {addr.postalCode}, {addr.country}
-                              </p>
-                              <p className="text-primary font-bold text-sm mt-1">{addr.phone}</p>
+                              <div className="flex-grow">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <p className="font-black text-text">{addr.address}</p>
+                                  {addr.isDefault && (
+                                    <span className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">Default</span>
+                                  )}
+                                  <span className="bg-gray-100 text-text text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">{addr.distance !== undefined ? addr.distance : 1.5} km</span>
+                                </div>
+                                <p className="text-secondary font-medium text-sm">
+                                  {addr.city}, {addr.postalCode}, {addr.country}
+                                </p>
+                                <p className="text-primary font-bold text-sm mt-1">{addr.phone}</p>
+                              </div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addr._id); }}
+                                title="Delete Address"
+                                className="p-2.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-2xl transition-all shrink-0 ml-2"
+                              >
+                                <Trash2 size={18} />
+                              </button>
                             </div>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addr._id); }}
-                              title="Delete Address"
-                              className="p-2.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-2xl transition-all shrink-0 ml-2"
-                            >
-                              <Trash2 size={18} />
-                            </button>
                           </div>
-                        </div>
-                      ))}
+                        ))}
 
                       {/* Manage Addresses Redirection Link */}
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-gray-50 border border-gray-100 rounded-[24px] mt-6">
                         <div className="text-center sm:text-left">
                           <p className="font-extrabold text-sm text-text">Want to manage all address options?</p>
                           <p className="text-secondary text-xs font-semibold mt-0.5">
-                            {savedAddresses.length > 1 
-                              ? `Showing 1 of your ${savedAddresses.length} saved locations.` 
+                            {savedAddresses.length > 1
+                              ? `Showing 1 of your ${savedAddresses.length} saved locations.`
                               : "Add, delete, or set default delivery addresses easily."}
                           </p>
                         </div>
-                        <Link 
+                        <Link
                           to="/addresses"
                           className="px-5 py-2.5 bg-white border border-gray-200 hover:border-primary/30 text-secondary hover:text-primary font-bold text-xs rounded-xl shadow-sm hover:shadow transition-all text-center shrink-0"
                         >
@@ -487,46 +485,46 @@ const Checkout = () => {
                               {detectingLocation ? '📍 Detecting location...' : '📍 Use Current Location'}
                             </Button>
                           </div>
-                                      {/* Simulated Geolocation Status Banner inside checkout form */}
-                           {!hasGeolocated && (
-                             <div className="md:col-span-2 p-4 bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-extrabold mb-4 animate-pulse">
-                               <span>⚠️ Please click "Use Current Location" first to set your coordinates and shipping distance accurately.</span>
-                             </div>
-                           )}
-                           {hasGeolocated && (
-                             <div className="md:col-span-2 p-4 bg-primary/5 border border-primary/10 text-primary rounded-2xl flex items-center justify-between text-xs font-black mb-4">
-                               <span className="flex items-center gap-2">📍 Distance calculated to outlet:</span>
-                               <span className="bg-primary text-white px-2.5 py-0.5 rounded-full">{formDistance} KM</span>
-                             </div>
-                           )}
+                          {/* Simulated Geolocation Status Banner inside checkout form */}
+                          {!hasGeolocated && (
+                            <div className="md:col-span-2 p-4 bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-extrabold mb-4 animate-pulse">
+                              <span>⚠️ Please click "Use Current Location" first to set your coordinates and shipping distance accurately.</span>
+                            </div>
+                          )}
+                          {hasGeolocated && (
+                            <div className="md:col-span-2 p-4 bg-primary/5 border border-primary/10 text-primary rounded-2xl flex items-center justify-between text-xs font-black mb-4">
+                              <span className="flex items-center gap-2">📍 Distance calculated to outlet:</span>
+                              <span className="bg-primary text-white px-2.5 py-0.5 rounded-full">{formDistance} KM</span>
+                            </div>
+                          )}
 
-                           <div className="md:col-span-2">
-                             <Input 
-                               label="Street Address / Area (Refine your street, house, landmark)" 
-                               value={formAddress} 
-                               onChange={(e) => setFormAddress(e.target.value)} 
-                               required 
-                               disabled={!hasGeolocated}
-                               placeholder={hasGeolocated ? "e.g. Flat 301, Vaishno Vihar" : "⚠️ Click 'Use Current Location' first"} 
-                             />
-                           </div>
-                           <Input label="City" value={formCity} disabled={!hasGeolocated} readOnly={hasGeolocated} required placeholder="City" />
-                           <Input label="Postal Code" value={formPostalCode} disabled={!hasGeolocated} readOnly={hasGeolocated} required placeholder="Postal Code" />
-                           <Input label="Country" value={formCountry} disabled required placeholder="India" />
-                           <Input label="Phone Number" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} required placeholder="+91 98765 43210" />
- 
-                           <div className="md:col-span-2 mt-6 flex gap-4">
-                             <Button 
-                               type="submit" 
-                               disabled={savingAddress || !hasGeolocated} 
-                               className="flex-grow h-12 rounded-2xl font-black"
-                             >
-                               {savingAddress ? 'Saving...' : !hasGeolocated ? 'Lock Location to Save Address' : 'Save Address'}
-                             </Button>
-                             <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="px-8 rounded-2xl">
-                               Cancel
-                             </Button>
-                           </div>
+                          <div className="md:col-span-2">
+                            <Input
+                              label="Street Address / Area (Refine your street, house, landmark)"
+                              value={formAddress}
+                              onChange={(e) => setFormAddress(e.target.value)}
+                              required
+                              disabled={!hasGeolocated}
+                              placeholder={hasGeolocated ? "e.g. Flat 301, Vaishno Vihar" : "⚠️ Click 'Use Current Location' first"}
+                            />
+                          </div>
+                          <Input label="City" value={formCity} disabled={!hasGeolocated} readOnly={hasGeolocated} required placeholder="City" />
+                          <Input label="Postal Code" value={formPostalCode} disabled={!hasGeolocated} readOnly={hasGeolocated} required placeholder="Postal Code" />
+                          <Input label="Country" value={formCountry} disabled required placeholder="India" />
+                          <Input label="Phone Number" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} required placeholder="+91 98765 43210" />
+
+                          <div className="md:col-span-2 mt-6 flex gap-4">
+                            <Button
+                              type="submit"
+                              disabled={savingAddress || !hasGeolocated}
+                              className="flex-grow h-12 rounded-2xl font-black"
+                            >
+                              {savingAddress ? 'Saving...' : !hasGeolocated ? 'Lock Location to Save Address' : 'Save Address'}
+                            </Button>
+                            <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="px-8 rounded-2xl">
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
                       </motion.form>
                     )}
@@ -590,11 +588,14 @@ const Checkout = () => {
               <h3 className="text-xl font-extrabold text-text mb-8">Your Items</h3>
               <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
                 {cartItems.map((item) => (
-                  <div key={item.product} className="flex gap-4">
-                    <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-cover" />
+                  <div key={item.cartItemId || item.product} className="flex gap-4">
+                    <Image src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-cover" />
                     <div className="flex-grow">
                       <p className="font-bold text-text line-clamp-1">{item.name}</p>
-                      <p className="text-sm text-secondary font-bold">Qty: {item.quantity} × ₹{item.price}</p>
+                      {item.selectedVariant && (
+                        <p className="text-[10px] text-primary font-black uppercase tracking-wider mb-0.5">{item.selectedVariant}</p>
+                      )}
+                      <p className="text-sm text-secondary font-bold">Qty: {item.quantity} × ₹{item.price.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}

@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Meta from '../../components/layout/Meta';
 import toast from 'react-hot-toast';
+import Image from '../../components/ui/Image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Wishlist = () => {
@@ -104,8 +105,8 @@ const Wishlist = () => {
                 >
                   <Card className="group flex flex-col h-full bg-white border border-gray-100 overflow-hidden">
                     <div className="relative h-64 overflow-hidden">
-                      <img 
-                        src={product.images[0]?.url || 'https://via.placeholder.com/400'} 
+                      <Image 
+                        src={product.images[0]?.url} 
                         alt={product.name} 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />

@@ -18,6 +18,7 @@ import axios from 'axios';
 import { APP_CONFIG } from '../../config/constants';
 import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
+import Image from '../../components/ui/Image';
 import Skeleton from '../../components/ui/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -265,9 +266,12 @@ const OrderManagement = () => {
                      <div className="space-y-4">
                        {selectedOrder.orderItems.map((item, i) => (
                          <div key={i} className="flex items-center gap-6 p-4 bg-background rounded-[24px] border border-gray-100">
-                           <img src={item.image} alt={item.name} className="w-20 h-20 rounded-2xl object-cover" />
+                           <Image src={item.image} alt={item.name} className="w-20 h-20 rounded-2xl object-cover" />
                            <div className="flex-grow">
                              <h4 className="font-black text-text">{item.name}</h4>
+                             {item.selectedVariant && (
+                               <p className="text-xs text-primary font-black uppercase tracking-wider mb-0.5">{item.selectedVariant}</p>
+                             )}
                              <p className="text-secondary font-bold">{item.quantity} x ₹{item.price.toFixed(2)}</p>
                            </div>
                            <p className="text-xl font-black text-text">₹{(item.quantity * item.price).toFixed(2)}</p>

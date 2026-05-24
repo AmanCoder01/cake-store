@@ -5,6 +5,7 @@ import axios from 'axios';
 import { APP_CONFIG } from '../../config/constants';
 import toast from 'react-hot-toast';
 import Skeleton from '../../components/ui/Skeleton';
+import Image from '../../components/ui/Image';
 import Button from '../../components/ui/Button';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -173,10 +174,13 @@ const Orders = () => {
                     <div className="flex flex-wrap gap-4">
                       {order.orderItems.map((item, i) => (
                         <div key={i} className="flex items-center gap-4 bg-background p-3 rounded-2xl border border-gray-100 hover:border-primary/20 transition-all">
-                          <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover" />
+                          <Image src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover" />
                           <div className="flex-grow">
                             <p className="font-bold text-sm text-text line-clamp-1">{item.name}</p>
-                            <p className="text-xs text-secondary font-bold">{item.quantity} x ₹{item.price}</p>
+                            {item.selectedVariant && (
+                              <p className="text-[10px] text-primary font-black uppercase tracking-wider mb-0.5">{item.selectedVariant}</p>
+                            )}
+                            <p className="text-xs text-secondary font-bold">{item.quantity} x ₹{item.price.toFixed(2)}</p>
                           </div>
                           {order.status === 'Delivered' && (
                             reviewedProductIds.includes(item.product) ? (
