@@ -37,10 +37,10 @@ const Footer = () => {
         <div>
           <h4 className="font-bold text-text mb-4 sm:mb-6">Information</h4>
           <ul className="space-y-3 sm:space-y-4">
-            <li><a href="#" className="text-secondary hover:text-primary text-sm transition-colors">About Us</a></li>
-            <li><a href="#" className="text-secondary hover:text-primary text-sm transition-colors">Terms & Conditions</a></li>
-            <li><a href="#" className="text-secondary hover:text-primary text-sm transition-colors">Privacy Policy</a></li>
-            <li><a href="#" className="text-secondary hover:text-primary text-sm transition-colors">Baking Process</a></li>
+            <li><Link to="/about" className="text-secondary hover:text-primary text-sm transition-colors">About Us</Link></li>
+            <li><Link to="/terms" className="text-secondary hover:text-primary text-sm transition-colors">Terms & Conditions</Link></li>
+            <li><Link to="/privacy-policy" className="text-secondary hover:text-primary text-sm transition-colors">Privacy Policy</Link></li>
+            <li><Link to="/baking-process" className="text-secondary hover:text-primary text-sm transition-colors">Baking Process</Link></li>
           </ul>
         </div>
 
@@ -49,7 +49,7 @@ const Footer = () => {
           <ul className="space-y-3 sm:space-y-4">
             <li className="flex items-start gap-3 text-secondary text-sm">
               <MapPin size={18} className="text-primary shrink-0" />
-              <span>123 Sweet Lane, Mumbai, MH 400001</span>
+              <span>Near Assi Ghat, Shivala, Varanasi, UP 221005</span>
             </li>
             <li className="flex items-center gap-3 text-secondary text-sm">
               <Phone size={18} className="text-primary shrink-0" />
@@ -57,15 +57,15 @@ const Footer = () => {
             </li>
             <li className="flex items-center gap-3 text-secondary text-sm">
               <Mail size={18} className="text-primary shrink-0" />
-              <span>hello@cakebakers.com</span>
+              <span>hello@cakebakersvaranasi.com</span>
             </li>
           </ul>
         </div>
       </div>
-      
+
       <div className="max-w-[1536px] mx-auto px-4 md:px-8 lg:px-16 xl:px-24 mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-secondary text-xs">
         <p>© 2026 {APP_CONFIG.APP_NAME}. All rights reserved.</p>
-        <span>Designed & Developed by <span className="text-primary font-bold">Aman Maurya</span> ❤️</span>
+        <span>Designed & Developed by <span className="text-primary font-bold">Aman</span> ❤️</span>
       </div>
     </footer>
   );

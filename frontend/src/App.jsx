@@ -26,6 +26,10 @@ import Signup from './pages/customer/Signup';
 import Checkout from './pages/customer/Checkout';
 import Orders from './pages/customer/Orders';
 import Wishlist from './pages/customer/Wishlist';
+import AboutUs from './pages/customer/AboutUs';
+import BakingProcess from './pages/customer/BakingProcess';
+import PrivacyPolicy from './pages/customer/PrivacyPolicy';
+import Terms from './pages/customer/Terms';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -88,6 +92,10 @@ function App() {
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/baking-process" element={<BakingProcess />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
           
           {/* Catch-all for non-existent routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
